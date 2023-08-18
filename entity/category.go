@@ -1,6 +1,8 @@
 package entity
 
 type Category struct {
-	Title string
-	Color string
+	Id     string
+	Title  string
+	Color  string
+	UserId uint
 }
