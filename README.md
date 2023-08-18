@@ -1,4 +1,7 @@
 # Entities
+
+---
+
 ## Category
 ### Properties:
 - Title
@@ -9,6 +12,7 @@
 - List User Categories with progress status
 - Edit a category
 
+---
 
 ## Task
 ### Properties:
@@ -24,6 +28,7 @@
 - Change Task status (done/undone)
 - Edit a task
 
+---
 
 ## User
 ### Properties:
@@ -34,6 +39,8 @@
 ### Behaviors:
 - Register a user
 - Log in user
+
+---
 
 # User Stories
 - [ ] User should be registered 
@@ -47,3 +54,6 @@
 - [ ] User can Done/Undone a task
 - [ ] User can Edit a task
 - [ ] User can Edit a category
+
+---
+
