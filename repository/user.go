@@ -1,21 +1,24 @@
 package repository
 
 import (
-	h "github.com/abtinokhovat/file-handler-go"
+	"errors"
 	"sync"
 	"todo-cli-go/entity"
-)
 
-var (
-	once     sync.Once
-	instance *UserRepository
+	h "github.com/abtinokhovat/file-handler-go"
 )
 
 const path = ""
 
+var (
+	once            sync.Once
+	instance        *UserRepository
+	ErrUserNotFound = errors.New("user not found")
+)
+
 type UserStorageAdapter interface {
 	Create(email, password string) error
-	Get(email, password string) *entity.User
+	Get(email string) (*entity.User, error)
 }
 
 type UserRepository struct {
@@ -25,7 +28,6 @@ type UserRepository struct {
 func NewUserRepository(handler h.FileIOHandler[entity.User]) *UserRepository {
 	return &UserRepository{handler: handler}
 }
-
 func GetUserRepository() *UserRepository {
 	once.Do(func() {
 		serializer := h.NewJsonSerializer[entity.User]()
@@ -35,12 +37,27 @@ func GetUserRepository() *UserRepository {
 	return instance
 }
 
-func (u *UserRepository) Create(email, password string) error {
-	//TODO implement me
-	panic("implement me")
+func (r *UserRepository) Create(email, password string) error {
+	// TODO: implement get new id method
+	id := 0
+	user := entity.NewUser(id, email, password)
+	err := r.handler.WriteOne(*user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
+func (r *UserRepository) Get(email string) (*entity.User, error) {
+	users, err := r.handler.Read()
+	if err != nil {
+		return nil, err
+	}
 
-func (u *UserRepository) Get(email, password string) *entity.User {
-	//TODO implement me
-	panic("implement me")
+	for _, user := range users {
+		if user.Email == email {
+			return &user, nil
+		}
+	}
+
+	return nil, ErrUserNotFound
 }
