@@ -17,7 +17,7 @@ var (
 )
 
 type UserStorageAdapter interface {
-	Create(email, password string) error
+	Create(email, password string) (*entity.User, error)
 	Get(email string) (*entity.User, error)
 }
 
@@ -37,15 +37,23 @@ func GetUserRepository() *UserRepository {
 	return instance
 }
 
-func (r *UserRepository) Create(email, password string) error {
-	// TODO: implement get new id method
-	id := 0
+func (r *UserRepository) NewID() int {
+	users, _ := r.handler.Read()
+	return len(users) + 1
+}
+func (r *UserRepository) Create(email, password string) (*entity.User, error) {
+	// get new ID
+	id := r.NewID()
+
+	// make user
 	user := entity.NewUser(id, email, password)
+
+	// write user with file handler
 	err := r.handler.WriteOne(*user)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return user, nil
 }
 func (r *UserRepository) Get(email string) (*entity.User, error) {
 	users, err := r.handler.Read()
