@@ -57,3 +57,8 @@
 
 ---
 
+# Flow
+
+- Execution flow
+![Flow Diagram](./docs/exec-flow.png)
+
