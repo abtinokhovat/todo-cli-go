@@ -16,6 +16,10 @@ var (
 	ErrUserNotFound = errors.New("user not found")
 )
 
+type IDGenerator interface {
+	newID() int
+}
+
 type UserStorageAdapter interface {
 	Create(email, password string) (*entity.User, error)
 	Get(email string) (*entity.User, error)
