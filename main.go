@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	initCommand := cmd.CommandBuilder(entityType, operation)
+	initCommand := cmd.CommandBuilder(operation, entityType)
 
 	command := cmd.NewCommand(user)
 	runCommandLoop(command, initCommand, scanner)
