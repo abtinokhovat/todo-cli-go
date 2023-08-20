@@ -22,6 +22,24 @@ var userStorage = []entity.User{
 	},
 }
 
+func TestGetUserRepository(t *testing.T) {
+	t.Run("test singelton", func(t *testing.T) {
+		// 1. setup
+		var repoArray []*repository.UserRepository
+
+		// 2. execution
+		for i := 0; i < 30; i++ {
+			repo := repository.GetUserRepository()
+			repoArray = append(repoArray, repo)
+		}
+
+		// 3. assertion
+		for i := 0; i < len(repoArray)-1; i++ {
+			assert.Equal(t, repoArray[i], repoArray[i+1])
+		}
+	})
+}
+
 func TestUserRepository_Create(t *testing.T) {
 	t.Run("ordinary", func(t *testing.T) {
 		// 1. setup
