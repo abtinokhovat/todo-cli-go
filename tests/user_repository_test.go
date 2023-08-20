@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"errors"
 	"github.com/stretchr/testify/assert"
+	"slices"
 	"testing"
 	"todo-cli-go/entity"
 	"todo-cli-go/repository"
@@ -31,39 +31,59 @@ func TestUserRepository_Create(t *testing.T) {
 		password := "password"
 
 		// 2. execution
-		err := userRepo.Create(email, password)
+		createdUser, err := userRepo.Create(email, password)
 
 		// 3. assertion
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(userStorage), "user length expected to be 3 but was %d", len(userStorage))
+		assert.True(t, slices.Contains(userStorage, *createdUser))
 	})
 
 }
 
 func TestUserRepository_Get(t *testing.T) {
-	mockHandler := &MockUserIOHandler{}
-	userRepo := repository.NewUserRepository(mockHandler)
 
-	// Adding test data to the mock handler
-	email := "test@example.com"
-	password := "password"
-	user := entity.NewUser(1, email, password)
-	err := mockHandler.WriteOne(*user)
-	if err != nil {
-		return
+	testCases := []struct {
+		name     string
+		email    string
+		expected string
+		err      error
+	}{
+		{
+			"available user",
+			userStorage[1].Email,
+			userStorage[1].String(),
+			nil,
+		},
+		{
+			"not existed user",
+			"nonexistent@example.com",
+			"",
+			repository.ErrUserNotFound,
+		},
 	}
 
-	// Test existing user
-	foundUser, err := userRepo.Get(email)
-	assert.NoError(t, err)
-	assert.NotNil(t, foundUser)
-	assert.Equal(t, email, foundUser.Email)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// 1. setup
+			mockHandler := &MockUserIOHandler{}
+			userRepo := repository.NewUserRepository(mockHandler)
 
-	// Test non-existing user
-	nonExistentEmail := "nonexistent@example.com"
-	_, err = userRepo.Get(nonExistentEmail)
-	assert.Error(t, err)
-	assert.True(t, errors.Is(err, repository.ErrUserNotFound))
+			// 2. execution
+			foundUser, err := userRepo.Get(tc.email)
+
+			// 3. assertion
+			// on error
+			if tc.err != nil {
+				assert.Equal(t, tc.err, err)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, foundUser)
+				assert.Equal(t, tc.expected, foundUser.String())
+			}
+		})
+
+	}
 }
 
 // MockUserIOHandler is a mock implementation of the FileIOHandler interface
