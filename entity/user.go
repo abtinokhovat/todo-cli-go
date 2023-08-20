@@ -1,5 +1,7 @@
 package entity
 
+import "fmt"
+
 type User struct {
 	Id       uint
 	Email    string
@@ -13,6 +15,10 @@ func NewUser(id int, email, password string) *User {
 		Email:    email,
 		Password: hashed,
 	}
+}
+
+func (u User) String() string {
+	return fmt.Sprintf("#%d-%s", u.Id, u.Email)
 }
 
 func hash(str string) string {
