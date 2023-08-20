@@ -5,6 +5,7 @@ import (
 	"slices"
 	"testing"
 	"todo-cli-go/entity"
+	apperror "todo-cli-go/error"
 	"todo-cli-go/repository"
 )
 
@@ -59,7 +60,7 @@ func TestUserRepository_Get(t *testing.T) {
 			"not existed user",
 			"nonexistent@example.com",
 			"",
-			repository.ErrUserNotFound,
+			apperror.ErrUserNotFound,
 		},
 	}
 

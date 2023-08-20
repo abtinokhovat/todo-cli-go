@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"errors"
 	"sync"
 	"todo-cli-go/entity"
+	apperror "todo-cli-go/error"
 
 	h "github.com/abtinokhovat/file-handler-go"
 )
@@ -11,9 +11,8 @@ import (
 const path = "storage/user.json"
 
 var (
-	once            sync.Once
-	instance        *UserRepository
-	ErrUserNotFound = errors.New("user not found")
+	once     sync.Once
+	instance *UserRepository
 )
 
 type IDGenerator interface {
@@ -71,5 +70,5 @@ func (r *UserRepository) Get(email string) (*entity.User, error) {
 		}
 	}
 
-	return nil, ErrUserNotFound
+	return nil, apperror.ErrUserNotFound
 }

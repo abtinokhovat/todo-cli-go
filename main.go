@@ -64,7 +64,7 @@ func registerAndLogin(scanner *bufio.Scanner, authService *service.UserService) 
 	email := cmd.Scan(scanner, "Enter your email address")
 	password := cmd.Scan(scanner, "Enter your password")
 
-	err := authService.Register(email, password)
+	_, err := authService.Register(email, password)
 	if err != nil {
 		fmt.Println("Error on registering user:", err)
 	}
