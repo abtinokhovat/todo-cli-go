@@ -8,7 +8,7 @@ import (
 	h "github.com/abtinokhovat/file-handler-go"
 )
 
-const path = ""
+const path = "storage/user.json"
 
 var (
 	once            sync.Once
@@ -37,13 +37,13 @@ func GetUserRepository() *UserRepository {
 	return instance
 }
 
-func (r *UserRepository) NewID() int {
+func (r *UserRepository) newID() int {
 	users, _ := r.handler.Read()
 	return len(users) + 1
 }
 func (r *UserRepository) Create(email, password string) (*entity.User, error) {
 	// get new ID
-	id := r.NewID()
+	id := r.newID()
 
 	// make user
 	user := entity.NewUser(id, email, password)
