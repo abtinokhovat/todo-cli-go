@@ -43,12 +43,12 @@
 ---
 
 # User Stories
-- [ ] User should be registered 
-- [ ] User should be able to log in to the application 
+- [X] User should be registered 
+- [X] User should be able to log in to the application 
 - [ ] User can create a new category 
-- [ ] User can add a new task 
+- [ ] User can add a new task
+- [ ] User can see the List of its tasks
 - [ ] User can see the list of categories with progress status
-- [ ] User can see the List of its tasks 
 - [ ] User can see the Today’s Tasks
 - [ ] User can see the Tasks by date
 - [ ] User can Done/Undone a task
