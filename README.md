@@ -43,17 +43,25 @@
 ---
 
 # User Stories
+### user related
 - [X] User should be registered 
-- [X] User should be able to log in to the application 
+- [X] User should be able to log in to the application
+
+### category related
 - [ ] User can create a new category 
+- [ ] User can Edit a category
+- [ ] User can see the list of categories
+
+### task related
 - [ ] User can add a new task
+- [ ] User can Edit a task
 - [ ] User can see the List of its tasks
-- [ ] User can see the list of categories with progress status
 - [ ] User can see the Today’s Tasks
 - [ ] User can see the Tasks by date
 - [ ] User can Done/Undone a task
-- [ ] User can Edit a task
-- [ ] User can Edit a category
+
+### others
+- [ ] User can see progress status
 
 ---
 
