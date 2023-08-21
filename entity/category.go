@@ -1,8 +1,17 @@
 package entity
 
 type Category struct {
-	Id     string
+	ID     uint
 	Title  string
 	Color  string
-	UserId uint
+	UserID uint
+}
+
+func NewCategory(id uint, title, color string, userId uint) *Category {
+	return &Category{
+		ID:     id,
+		Title:  title,
+		Color:  color,
+		UserID: userId,
+	}
 }
