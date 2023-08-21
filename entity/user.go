@@ -8,9 +8,9 @@ type User struct {
 	Password string
 }
 
-func NewUser(id int, email, password string) *User {
+func NewUser(id uint, email, password string) *User {
 	return &User{
-		Id:       uint(id),
+		Id:       id,
 		Email:    email,
 		Password: password,
 	}

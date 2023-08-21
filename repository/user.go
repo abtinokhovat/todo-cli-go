@@ -16,7 +16,7 @@ var (
 )
 
 type IDGenerator interface {
-	newID() int
+	newID() uint
 }
 
 type UserStorageAdapter interface {
@@ -40,9 +40,9 @@ func GetUserRepository() *UserRepository {
 	return userRepositoryInstance
 }
 
-func (r *UserRepository) newID() int {
+func (r *UserRepository) newID() uint {
 	users, _ := r.handler.Read()
-	return len(users) + 1
+	return uint(len(users) + 1)
 }
 func (r *UserRepository) Create(email, password string) (*entity.User, error) {
 	// get new ID
