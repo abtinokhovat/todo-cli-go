@@ -103,7 +103,7 @@ type MockUserRepository struct {
 
 func (m MockUserRepository) Create(email, password string) (*entity.User, error) {
 	// create a user
-	user := entity.NewUser(len(userStorage)+1, email, password)
+	user := entity.NewUser(uint(len(userStorage)+1), email, password)
 	// add user to storage
 	userStorage = append(userStorage, *user)
 	return user, nil

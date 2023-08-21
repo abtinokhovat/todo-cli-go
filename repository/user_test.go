@@ -43,7 +43,9 @@ func TestGetUserRepository(t *testing.T) {
 func TestUserRepository_Create(t *testing.T) {
 	t.Run("ordinary", func(t *testing.T) {
 		// 1. setup
-		mockHandler := &MockUserIOHandler{}
+		mockHandler := &MockIOHandler[entity.User]{
+			storage: &userStorage,
+		}
 		userRepo := repository.NewUserRepository(mockHandler)
 
 		email := "test@example.com"
@@ -85,7 +87,9 @@ func TestUserRepository_Get(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
-			mockHandler := &MockUserIOHandler{}
+			mockHandler := &MockIOHandler[entity.User]{
+				storage: &userStorage,
+			}
 			userRepo := repository.NewUserRepository(mockHandler)
 
 			// 2. execution
@@ -103,24 +107,4 @@ func TestUserRepository_Get(t *testing.T) {
 		})
 
 	}
-}
-
-// MockUserIOHandler is a mock implementation of the FileIOHandler interface
-type MockUserIOHandler struct {
-}
-
-func (h *MockUserIOHandler) Read() ([]entity.User, error) {
-	return userStorage, nil
-}
-func (h *MockUserIOHandler) WriteOne(data entity.User) error {
-	userStorage = append(userStorage, data)
-	return nil
-}
-func (h *MockUserIOHandler) DeleteAndWrite(data []entity.User) error {
-	userStorage = data
-	return nil
-}
-func (h *MockUserIOHandler) DeleteAll() error {
-	userStorage = []entity.User{}
-	return nil
 }
