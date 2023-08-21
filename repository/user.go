@@ -5,14 +5,14 @@ import (
 	"todo-cli-go/entity"
 	apperror "todo-cli-go/error"
 
-	h "github.com/abtinokhovat/file-handler-go"
+	fileHandler "github.com/abtinokhovat/file-handler-go"
 )
 
-const path = "storage/user.json"
+const userStoragePath = "storage/user.json"
 
 var (
-	once     sync.Once
-	instance *UserRepository
+	onceUser               sync.Once
+	userRepositoryInstance *UserRepository
 )
 
 type IDGenerator interface {
@@ -25,19 +25,19 @@ type UserStorageAdapter interface {
 }
 
 type UserRepository struct {
-	handler h.FileIOHandler[entity.User]
+	handler fileHandler.FileIOHandler[entity.User]
 }
 
-func NewUserRepository(handler h.FileIOHandler[entity.User]) *UserRepository {
+func NewUserRepository(handler fileHandler.FileIOHandler[entity.User]) *UserRepository {
 	return &UserRepository{handler: handler}
 }
 func GetUserRepository() *UserRepository {
-	once.Do(func() {
-		serializer := h.NewJsonSerializer[entity.User]()
-		handler := h.NewJsonIOHandler[entity.User](path, serializer)
-		instance = NewUserRepository(handler)
+	onceUser.Do(func() {
+		serializer := fileHandler.NewJsonSerializer[entity.User]()
+		handler := fileHandler.NewJsonIOHandler[entity.User](userStoragePath, serializer)
+		userRepositoryInstance = NewUserRepository(handler)
 	})
-	return instance
+	return userRepositoryInstance
 }
 
 func (r *UserRepository) newID() int {
