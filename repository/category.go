@@ -11,7 +11,7 @@ const categoryStoragePath = "storage/category.json"
 
 var (
 	onceCategory               sync.Once
-	categoryRepositoryInstance *CategoryRepository
+	categoryRepositoryInstance *CategoryFileRepository
 )
 
 type CategoryStorageAdapter interface {
@@ -21,24 +21,24 @@ type CategoryStorageAdapter interface {
 	GetAll() ([]*entity.Category, error)
 }
 
-type CategoryRepository struct {
+type CategoryFileRepository struct {
 	handler fileHandler.FileIOHandler[entity.Category]
 }
 
-func GetCategoryRepository() *CategoryRepository {
+func GetCategoryFileRepository() *CategoryFileRepository {
 	onceCategory.Do(func() {
 		serializer := fileHandler.NewJsonSerializer[entity.Category]()
 		handler := fileHandler.NewJsonIOHandler[entity.Category](categoryStoragePath, serializer)
-		categoryRepositoryInstance = NewCategoryRepository(handler)
+		categoryRepositoryInstance = NewCategoryFileRepository(handler)
 	})
 
 	return categoryRepositoryInstance
 }
-func NewCategoryRepository(handler fileHandler.FileIOHandler[entity.Category]) *CategoryRepository {
-	return &CategoryRepository{handler: handler}
+func NewCategoryFileRepository(handler fileHandler.FileIOHandler[entity.Category]) *CategoryFileRepository {
+	return &CategoryFileRepository{handler: handler}
 }
 
-func (r *CategoryRepository) Create(title, color string, userId uint) (*entity.Category, error) {
+func (r *CategoryFileRepository) Create(title, color string, userId uint) (*entity.Category, error) {
 	// generate new id
 	id := r.newID()
 
@@ -52,7 +52,7 @@ func (r *CategoryRepository) Create(title, color string, userId uint) (*entity.C
 	}
 	return category, nil
 }
-func (r *CategoryRepository) GetAll() ([]entity.Category, error) {
+func (r *CategoryFileRepository) GetAll() ([]entity.Category, error) {
 	categories, err := r.handler.Read()
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (r *CategoryRepository) GetAll() ([]entity.Category, error) {
 
 	return categories, nil
 }
-func (r *CategoryRepository) GetByID(id uint) (*entity.Category, error) {
+func (r *CategoryFileRepository) GetByID(id uint) (*entity.Category, error) {
 	categories, err := r.GetAll()
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (r *CategoryRepository) GetByID(id uint) (*entity.Category, error) {
 
 	return nil, apperror.ErrCategoryNotFound
 }
-func (r *CategoryRepository) Edit(id uint, title, color string) (*entity.Category, error) {
+func (r *CategoryFileRepository) Edit(id uint, title, color string) (*entity.Category, error) {
 	categories, err := r.GetAll()
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func (r *CategoryRepository) Edit(id uint, title, color string) (*entity.Categor
 
 	return nil, apperror.ErrCategoryNotFoundToEdit
 }
-func (r *CategoryRepository) newID() uint {
+func (r *CategoryFileRepository) newID() uint {
 	categories, err := r.handler.Read()
 	if err != nil {
 		panic("could not get a new id for telegram error happened in reading file")
