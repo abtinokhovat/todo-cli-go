@@ -45,7 +45,7 @@ func (h *MockIOHandler[T]) DeleteAndWrite(data []T) error {
 		h.storage = &data
 		return nil
 	}
-	return errors.New(ErrDeleting)
+	return errors.New(ErrOnWritingOrReading)
 }
 func (h *MockIOHandler[T]) DeleteAll() error {
 	if h.config.delete {

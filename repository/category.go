@@ -87,6 +87,8 @@ func (r *CategoryFileRepository) Edit(id uint, title, color string) (*entity.Cat
 		if categories[i].ID == id {
 			categories[i].Title = title
 			categories[i].Color = color
+
+			return &categories[i], nil
 		}
 
 		// delete all data in file and rewrite it
@@ -94,8 +96,6 @@ func (r *CategoryFileRepository) Edit(id uint, title, color string) (*entity.Cat
 		if err != nil {
 			return nil, err
 		}
-
-		return &categories[i], nil
 	}
 
 	return nil, apperror.ErrCategoryNotFoundToEdit
