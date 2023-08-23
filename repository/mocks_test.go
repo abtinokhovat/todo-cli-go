@@ -5,7 +5,6 @@ import "errors"
 const (
 	ErrOnReading          = "error on reading file"
 	ErrOnWriting          = "error on writing file"
-	ErrDeleting           = "error on deleting file"
 	ErrOnWritingOrReading = "error on deleting and writing file file"
 )
 
