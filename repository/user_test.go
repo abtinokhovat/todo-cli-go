@@ -43,10 +43,8 @@ func TestGetUserRepository(t *testing.T) {
 func TestUserRepository_Create(t *testing.T) {
 	t.Run("ordinary", func(t *testing.T) {
 		// 1. setup
-		mockHandler := &MockIOHandler[entity.User]{
-			storage: &userStorage,
-		}
-		userRepo := repository.NewUserRepository(mockHandler)
+		handler := NewMockIOHandler(&userStorage, MockIOConfig{read: true, write: true, delete: true})
+		userRepo := repository.NewUserRepository(handler)
 
 		email := "test@example.com"
 		password := "password"
@@ -87,10 +85,8 @@ func TestUserRepository_Get(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
-			mockHandler := &MockIOHandler[entity.User]{
-				storage: &userStorage,
-			}
-			userRepo := repository.NewUserRepository(mockHandler)
+			handler := NewMockIOHandler(&userStorage, MockIOConfig{read: true, write: true, delete: true})
+			userRepo := repository.NewUserRepository(handler)
 
 			// 2. execution
 			foundUser, err := userRepo.Get(tc.email)
