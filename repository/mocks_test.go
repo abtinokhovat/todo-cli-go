@@ -4,52 +4,53 @@ import "errors"
 
 const (
 	ErrOnReading          = "error on reading file"
-	ErrWriting            = "error on writing file"
+	ErrOnWriting          = "error on writing file"
 	ErrDeleting           = "error on deleting file"
 	ErrOnWritingOrReading = "error on deleting and writing file file"
 )
 
 type MockIOHandler[T any] struct {
 	storage *[]T
+	config  MockIOConfig
 }
 
-func NewMockIOHandler[T any](storage *[]T) *MockIOHandler[T] {
+type MockIOConfig struct {
+	read   bool
+	write  bool
+	delete bool
+}
+
+func NewMockIOHandler[T any](storage *[]T, config MockIOConfig) *MockIOHandler[T] {
 	return &MockIOHandler[T]{
 		storage: storage,
+		config:  config,
 	}
 }
 
 func (h *MockIOHandler[T]) Read() ([]T, error) {
-	return *h.storage, nil
-}
-func (h *MockIOHandler[T]) WriteOne(data T) error {
-	*h.storage = append(*h.storage, data)
-	return nil
-}
-func (h *MockIOHandler[T]) DeleteAndWrite(data []T) error {
-	h.storage = &data
-	return nil
-}
-func (h *MockIOHandler[T]) DeleteAll() error {
-	h.storage = new([]T)
-	return nil
-}
-
-type MockBadIOHandler[T any] struct {
-}
-
-func (m MockBadIOHandler[T]) Read() ([]T, error) {
+	if h.config.read {
+		return *h.storage, nil
+	}
 	return nil, errors.New(ErrOnReading)
 }
-
-func (m MockBadIOHandler[T]) WriteOne(data T) error {
-	return errors.New(ErrWriting)
+func (h *MockIOHandler[T]) WriteOne(data T) error {
+	if h.config.write {
+		*h.storage = append(*h.storage, data)
+		return nil
+	}
+	return errors.New(ErrOnWriting)
 }
-
-func (m MockBadIOHandler[T]) DeleteAll() error {
+func (h *MockIOHandler[T]) DeleteAndWrite(data []T) error {
+	if h.config.delete && h.config.write {
+		h.storage = &data
+		return nil
+	}
 	return errors.New(ErrDeleting)
 }
-
-func (m MockBadIOHandler[T]) DeleteAndWrite(data []T) error {
+func (h *MockIOHandler[T]) DeleteAll() error {
+	if h.config.delete {
+		h.storage = new([]T)
+		return nil
+	}
 	return errors.New(ErrOnWritingOrReading)
 }
