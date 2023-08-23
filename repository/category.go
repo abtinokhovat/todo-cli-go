@@ -18,7 +18,7 @@ type CategoryStorageAdapter interface {
 	Create(title, color string, userID uint) (*entity.Category, error)
 	Edit(id uint, title, color string) (*entity.Category, error)
 	GetByID(id uint) (*entity.Category, error)
-	GetAll() ([]*entity.Category, error)
+	GetAll() ([]entity.Category, error)
 }
 
 type CategoryFileRepository struct {
@@ -40,13 +40,15 @@ func NewCategoryFileRepository(handler fileHandler.FileIOHandler[entity.Category
 
 func (r *CategoryFileRepository) Create(title, color string, userId uint) (*entity.Category, error) {
 	// generate new id
-	id := r.newID()
-
+	id, err := r.newID()
+	if err != nil {
+		return nil, err
+	}
 	// make a new category entity
 	category := entity.NewCategory(id, title, color, userId)
 
 	// write category to the storage
-	err := r.handler.WriteOne(*category)
+	err = r.handler.WriteOne(*category)
 	if err != nil {
 		return nil, err
 	}
@@ -80,11 +82,11 @@ func (r *CategoryFileRepository) Edit(id uint, title, color string) (*entity.Cat
 		return nil, err
 	}
 
-	for _, category := range categories {
+	for i, _ := range categories {
 		// update category data
-		if category.ID == id {
-			category.Title = title
-			category.Color = color
+		if categories[i].ID == id {
+			categories[i].Title = title
+			categories[i].Color = color
 		}
 
 		// delete all data in file and rewrite it
@@ -93,15 +95,15 @@ func (r *CategoryFileRepository) Edit(id uint, title, color string) (*entity.Cat
 			return nil, err
 		}
 
-		return &category, nil
+		return &categories[i], nil
 	}
 
 	return nil, apperror.ErrCategoryNotFoundToEdit
 }
-func (r *CategoryFileRepository) newID() uint {
+func (r *CategoryFileRepository) newID() (uint, error) {
 	categories, err := r.handler.Read()
 	if err != nil {
-		panic("could not get a new id for telegram error happened in reading file")
+		return 0, err
 	}
-	return uint(len(categories) + 1)
+	return uint(len(categories) + 1), nil
 }
