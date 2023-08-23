@@ -82,7 +82,7 @@ func (r *CategoryFileRepository) Edit(id uint, title, color string) (*entity.Cat
 		return nil, err
 	}
 
-	for i, _ := range categories {
+	for i := range categories {
 		// update category data
 		if categories[i].ID == id {
 			categories[i].Title = title
