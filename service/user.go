@@ -3,13 +3,9 @@ package service
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"errors"
 	"todo-cli-go/entity"
+	apperror "todo-cli-go/error"
 	"todo-cli-go/repository"
-)
-
-var (
-	ErrUserWrongPasswordOrEmail = errors.New("either your entered email or password is wrong")
 )
 
 type AuthService interface {
@@ -50,7 +46,7 @@ func (s *UserService) Login(email, password string) (*entity.User, error) {
 	if user.Password == s.hashPassword(password) {
 		return user, nil
 	} else {
-		return nil, ErrUserWrongPasswordOrEmail
+		return nil, apperror.ErrUserWrongPasswordOrEmail
 	}
 }
 
