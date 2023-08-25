@@ -25,5 +25,9 @@ func NewCategory(id uint, title, colour string, userId uint) *Category {
 }
 
 func (c *Category) String() string {
-	return color.Colorf(c.colorCode, "#%d-%s: 🚻%d", c.ID, c.Title, c.UserID)
+	// add color code if it was not initialized
+	if c.colorCode == "" {
+		c.colorCode = color.GetColor(c.Color)
+	}
+	return color.Colorf(c.colorCode, "#%d-%s", c.ID, c.Title)
 }
