@@ -1,24 +1,26 @@
 package repository_test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"slices"
 	"testing"
+
 	"todo-cli-go/entity"
-	apperror "todo-cli-go/error"
+	"todo-cli-go/error"
 	"todo-cli-go/repository"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var userStorage = []entity.User{
 	{
 		Email:    "user1@example.com",
 		Password: "password123",
-		Id:       1,
+		ID:       1,
 	},
 	{
 		Email:    "user2@example.com",
 		Password: "securepass",
-		Id:       2,
+		ID:       2,
 	},
 }
 
