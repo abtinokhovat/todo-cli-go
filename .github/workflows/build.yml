@@ -1,0 +1,29 @@
+name: Go Build and Test
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21  # Change to your desired Go version
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Build binary
+        run: go build -o todo-cli-go cmd/main.go
+
+      - name: Set version
+        id: set_version
+        run: echo "::set-output name=VERSION::$(git describe --tags --always)"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
