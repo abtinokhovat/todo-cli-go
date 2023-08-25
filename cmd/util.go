@@ -12,5 +12,6 @@ func CommandBuilder(entity, op string) string {
 func Scan(scanner *bufio.Scanner, message string) string {
 	fmt.Println(message)
 	scanner.Scan()
+	fmt.Println()
 	return scanner.Text()
 }
