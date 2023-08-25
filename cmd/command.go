@@ -1,18 +1,29 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strconv"
+
 	"todo-cli-go/entity"
+	"todo-cli-go/error"
+	"todo-cli-go/service"
 )
 
 type Command struct {
-	user *entity.User
+	scanner         *bufio.Scanner
+	user            *entity.User
+	categoryService *service.CategoryService
 }
 
-func NewCommand(user *entity.User) *Command {
+func NewCommand(user *entity.User, categoryService *service.CategoryService) *Command {
+	scanner := bufio.NewScanner(os.Stdin)
+
 	return &Command{
-		user: user,
+		user:            user,
+		categoryService: categoryService,
+		scanner:         scanner,
 	}
 }
 
@@ -60,14 +71,52 @@ func (c *Command) Execute(cmd string) {
 
 // Define command-specific handler methods
 func (c *Command) createCategory() {
-	fmt.Println("create-category")
+
+	title := Scan(c.scanner, "enter a title for your new category")
+	color := Scan(c.scanner, "enter a color for your new category")
+
+	category, err := c.categoryService.Create(title, color)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(category.String())
 }
 func (c *Command) editCategory() {
-	fmt.Println("edit-category")
+	id, err := strconv.Atoi(Scan(c.scanner, "enter the id of category you want to edit"))
+	if err != nil {
+		fmt.Println(apperror.ErrNotCorrectDigit)
+		return
+	}
+
+	title := Scan(c.scanner, "enter a title for updating")
+	color := Scan(c.scanner, "enter a color for updating")
+
+	category, err := c.categoryService.Edit(uint(id), title, color)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("update successful")
+	fmt.Println(category)
 }
 func (c *Command) listCategory() {
-	fmt.Println("list-category")
+	categories, err := c.categoryService.Get()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if len(categories) == 0 {
+		fmt.Println("no categories :( ,make one")
+	}
+
+	for _, category := range categories {
+		fmt.Println(category.String())
+	}
 }
+
 func (c *Command) createTask() {
 	fmt.Println("create-task")
 }

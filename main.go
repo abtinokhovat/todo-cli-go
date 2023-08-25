@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
 	"todo-cli-go/cmd"
 	"todo-cli-go/entity"
 	"todo-cli-go/service"
@@ -22,7 +23,9 @@ func main() {
 
 	initCommand := cmd.CommandBuilder(operation, entityType)
 
-	command := cmd.NewCommand(user)
+	categoryService := service.BuildCategoryService(user)
+
+	command := cmd.NewCommand(user, categoryService)
 	runCommandLoop(command, initCommand, scanner)
 }
 
