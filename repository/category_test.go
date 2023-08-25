@@ -24,6 +24,24 @@ var categoryStorage = []entity.Category{
 	},
 }
 
+func TestGetCategoryRepository(t *testing.T) {
+	t.Run("test singelton", func(t *testing.T) {
+		// 1. setup
+		var repoArray []*repository.CategoryFileRepository
+
+		// 2. execution
+		for i := 0; i < 30; i++ {
+			repo := repository.GetCategoryFileRepository()
+			repoArray = append(repoArray, repo)
+		}
+
+		// 3. assertion
+		for i := 0; i < len(repoArray)-1; i++ {
+			assert.Equal(t, repoArray[i], repoArray[i+1])
+		}
+	})
+}
+
 func TestCategoryRepository_GetByID(t *testing.T) {
 	testCases := []struct {
 		name       string
@@ -160,6 +178,20 @@ func TestCategoryRepository_Create(t *testing.T) {
 			},
 			errors.New(ErrOnReading),
 			MockIOConfig{read: false, write: true, delete: true},
+		},
+		{
+			"error on writing",
+			struct {
+				title  string
+				color  string
+				userId uint
+			}{
+				title:  "",
+				color:  "",
+				userId: 1,
+			},
+			errors.New(ErrOnWriting),
+			MockIOConfig{read: true, write: false, delete: true},
 		},
 	}
 
