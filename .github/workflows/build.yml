@@ -28,3 +28,8 @@ jobs:
       - run: go build -o todo-cli-go .
       - run: echo "VERSION=$(git describe --tags --abbrev=0)" > .version
       - run: go build -ldflags="-X 'main.Version=$(cat .version)'" -o todo-cli-go .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: todo-cli-go
+          path: todo-cli-go
