@@ -43,7 +43,7 @@ func parseArgs(args []string) (string, string) {
 	return entityType, operation
 }
 
-func handleAuthentication(scanner *bufio.Scanner, authService *service.UserService, entityType, operation string) *entity.User {
+func handleAuthentication(scanner *bufio.Scanner, authService service.AuthService, entityType, operation string) *entity.User {
 	if operation == "register" && entityType == "user" {
 		return registerAndLogin(scanner, authService)
 	}
@@ -51,7 +51,7 @@ func handleAuthentication(scanner *bufio.Scanner, authService *service.UserServi
 	return login(scanner, authService)
 }
 
-func login(scanner *bufio.Scanner, authService *service.UserService) *entity.User {
+func login(scanner *bufio.Scanner, authService service.AuthService) *entity.User {
 	email := cmd.Scan(scanner, "Enter your email address")
 	password := cmd.Scan(scanner, "Enter your password")
 
@@ -63,7 +63,7 @@ func login(scanner *bufio.Scanner, authService *service.UserService) *entity.Use
 	return user
 }
 
-func registerAndLogin(scanner *bufio.Scanner, authService *service.UserService) *entity.User {
+func registerAndLogin(scanner *bufio.Scanner, authService service.AuthService) *entity.User {
 	email := cmd.Scan(scanner, "Enter your email address")
 	password := cmd.Scan(scanner, "Enter your password")
 
