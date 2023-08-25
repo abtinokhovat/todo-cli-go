@@ -11,6 +11,11 @@ type CategoryService struct {
 	repo repository.CategoryStorageAdapter
 }
 
+func BuildCategoryService(user *entity.User) *CategoryService {
+	repo := repository.GetCategoryFileRepository()
+	return NewCategoryService(user, repo)
+}
+
 func NewCategoryService(user *entity.User, repository repository.CategoryStorageAdapter) *CategoryService {
 	return &CategoryService{user: user, repo: repository}
 }
