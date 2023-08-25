@@ -1,29 +1,30 @@
-name: Go Build and Test
-
-on: [push]
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.21
+      - run: go test ./...
+
   build:
     runs-on: ubuntu-latest
-
+    needs: test
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
         with:
-          go-version: 1.21  # Change to your desired Go version
-
-      - name: Run tests
-        run: go test ./...
-
-      - name: Build binary
-        run: go build -o todo-cli-go cmd/main.go
-
-      - name: Set version
-        id: set_version
-        run: echo "::set-output name=VERSION::$(git describe --tags --always)"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
+          go-version: 1.21
+      - run: go build -o todo-cli-go .
+      - run: echo "VERSION=$(git describe --tags --abbrev=0)" > .version
+      - run: go build -ldflags="-X 'main.Version=$(cat .version)'" -o todo-cli-go .
