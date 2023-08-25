@@ -27,6 +27,12 @@ var (
 			UserID: 1,
 		},
 		{
+			ID:     3,
+			Title:  "life",
+			Color:  "cyan",
+			UserID: 1,
+		},
+		{
 			ID:     2,
 			Title:  "personal",
 			Color:  "red",
@@ -91,6 +97,10 @@ func TestCategoryService_Edit(t *testing.T) {
 		{
 			name:     "ordinary edit",
 			category: entity.Category{ID: 1, Title: "updated category", Color: "updated color", UserID: 1},
+		},
+		{
+			name:     "ordinary edit 2",
+			category: entity.Category{ID: 3, Title: "updated category", Color: "updated color", UserID: 1},
 		},
 		{
 			name:     "not found category",

@@ -52,7 +52,7 @@ func (s *CategoryService) Edit(id uint, title, color string) (*entity.Category, 
 	}
 
 	// if the category was not for the user raise error
-	if category.ID != s.user.ID {
+	if category.UserID != s.user.ID {
 		return nil, apperror.ErrUnauthorized
 	}
 
