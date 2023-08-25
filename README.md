@@ -48,9 +48,9 @@
 - [X] User should be able to log in to the application
 
 ### category related
-- [ ] User can create a new category 
-- [ ] User can Edit a category
-- [ ] User can see the list of categories
+- [X] User can create a new category 
+- [X] User can Edit a category
+- [X] User can see the list of categories
 
 ### task related
 - [ ] User can add a new task
