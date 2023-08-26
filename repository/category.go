@@ -7,7 +7,10 @@ import (
 	apperror "todo-cli-go/error"
 )
 
-const categoryStoragePath = "storage/category.json"
+const (
+	categoryStoragePath = "storage/category.json"
+	NoCategory          = 0
+)
 
 var (
 	onceCategory               sync.Once
