@@ -3,7 +3,11 @@ package date
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
+
+	"todo-cli-go/error"
 )
 
 type Date struct {
@@ -22,6 +26,29 @@ func NewDate(year, month, day uint) (*Date, error) {
 		month: month,
 		day:   day,
 	}, nil
+}
+
+func NewDateFromString(str string) (*Date, error) {
+	data := strings.Split(str, "-")
+
+	if len(data) != 3 {
+		return nil, apperror.ErrNotInACorrectFormat
+	}
+
+	parsed := make([]uint, 3)
+	for i, value := range data {
+		num, err := strconv.Atoi(value)
+		if err != nil {
+			return nil, apperror.ErrNotCorrectDigit
+		}
+		parsed[i] = uint(num)
+	}
+
+	year := parsed[0]
+	month := parsed[1]
+	day := parsed[2]
+
+	return NewDate(year, month, day)
 }
 
 func Validator(year, month, day uint) bool {
