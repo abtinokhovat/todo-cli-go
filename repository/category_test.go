@@ -2,11 +2,13 @@ package repository_test
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
 	"todo-cli-go/entity"
-	apperror "todo-cli-go/error"
+	"todo-cli-go/error"
 	"todo-cli-go/repository"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var categoryStorage = []entity.Category{
