@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"todo-cli-go/pkg/date"
+	"todo-cli-go/repository"
 
 	"todo-cli-go/entity"
 	"todo-cli-go/error"
@@ -12,18 +14,22 @@ import (
 )
 
 type Command struct {
-	scanner         *bufio.Scanner
-	user            *entity.User
+	scanner *bufio.Scanner
+	user    *entity.User
+
 	categoryService *service.CategoryService
+	taskService     *service.TaskService
 }
 
-func NewCommand(user *entity.User, categoryService *service.CategoryService) *Command {
+func NewCommand(user *entity.User, categoryService *service.CategoryService, taskService *service.TaskService) *Command {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	return &Command{
-		user:            user,
+		scanner: scanner,
+		user:    user,
+
 		categoryService: categoryService,
-		scanner:         scanner,
+		taskService:     taskService,
 	}
 }
 
@@ -118,20 +124,104 @@ func (c *Command) listCategory() {
 }
 
 func (c *Command) createTask() {
-	fmt.Println("create-task")
+	// scan title
+	title := c.scan("enter your task title")
+
+	// scan due date
+	dueDateStr := c.scan("enter a due date for your task and if you don't want to add a date,press enter")
+	// make a date object from date string
+	var dueDate *date.Date = nil
+
+	if dueDateStr != "" {
+		d, err := date.NewDateFromString(dueDateStr)
+		dueDate = d
+		printErr(err)
+	}
+
+	categoryID, err := c.scanID("if you want to assign task to a category enter the category's id or press enter")
+	printErr(err)
+
+	created, err := c.taskService.Create(title, dueDate, categoryID)
+	printErr(err)
+
+	fmt.Println(created.String())
+
 }
 func (c *Command) listTask() {
-	fmt.Println("list-task")
+	tasks, err := c.taskService.Get()
+	printErr(err)
+
+	if len(tasks) == 0 {
+		fmt.Println("no task, you can create one")
+	}
+
+	for _, task := range tasks {
+		fmt.Println(task.String())
+	}
 }
 func (c *Command) listTaskToday() {
-	fmt.Println("list-task-today")
+	tasks, err := c.taskService.GetTodayTasks()
+	printErr(err)
+
+	if len(tasks) == 0 {
+		fmt.Println("no tasks for today, phew")
+	}
+
+	for _, task := range tasks {
+		fmt.Println(task.String())
+	}
 }
 func (c *Command) listTaskByDate() {
-	fmt.Println("list-task-bydate")
+	// scan date
+	dateStr := c.scan("enter a date for searching in tasks")
+	// make a date object from date string
+	sDate, err := date.NewDateFromString(dateStr)
+	printErr(err)
+
+	tasks, err := c.taskService.GetByDate(*sDate)
+	printErr(err)
+
+	if len(tasks) == 0 {
+		fmt.Println("no tasks in the date you requested")
+	}
+
+	for _, task := range tasks {
+		fmt.Println(task.String())
+	}
 }
 func (c *Command) editTask() {
 	fmt.Println("edit-task")
 }
 func (c *Command) toggleTask() {
-	fmt.Println("toggle-task")
+	taskID, err := c.scanID("enter a task id for toggling")
+	printErr(err)
+
+	err = c.taskService.Toggle(taskID)
+	printErr(err)
+
+	fmt.Println("done.")
+}
+
+func (c *Command) scan(message string) string {
+	return Scan(c.scanner, message)
+}
+func (c *Command) scanID(message string) (uint, error) {
+	scanned := c.scan(message)
+	if scanned == "" {
+		return repository.NoCategory, nil
+	}
+
+	id, err := strconv.Atoi(scanned)
+	if err != nil {
+		return 0, apperror.ErrNotCorrectDigit
+	}
+
+	return uint(id), nil
+}
+
+func printErr(err error) {
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
