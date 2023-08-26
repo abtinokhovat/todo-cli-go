@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"todo-cli-go/entity"
 	"todo-cli-go/error"
 	"todo-cli-go/pkg/date"
@@ -34,7 +36,9 @@ func (s *TaskService) Create(title string, dueDate *date.Date, categoryID uint) 
 
 func (s *TaskService) Edit(id uint, title string, done bool, dueDate *date.Date, categoryID uint) (*entity.Task, error) {
 	task, err := s.repo.GetByID(id)
-	if err != nil {
+	if errors.Is(err, apperror.ErrTaskNotFound) {
+		return nil, apperror.ErrTaskNotFoundToEdit
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -67,23 +71,17 @@ func (s *TaskService) Get() ([]entity.Task, error) {
 }
 
 func (s *TaskService) GetTodayTasks() ([]entity.Task, error) {
-	tasks, err := s.Get()
+	today := date.Now()
+	todayTasks, err := s.GetByDate(*today)
+
 	if err != nil {
 		return nil, err
-	}
-
-	today := date.Now()
-	var todayTasks []entity.Task
-	for _, task := range tasks {
-		if task.DueDate != nil && task.DueDate.IsSameDate(today) {
-			todayTasks = append(todayTasks, task)
-		}
 	}
 
 	return todayTasks, nil
 }
 
-func (s *TaskService) GetByDate(date *date.Date) ([]entity.Task, error) {
+func (s *TaskService) GetByDate(date date.Date) ([]entity.Task, error) {
 	tasks, err := s.Get()
 	if err != nil {
 		return nil, err
