@@ -10,7 +10,7 @@ import (
 	fileHandler "github.com/abtinokhovat/file-handler-go"
 )
 
-const taskStoragePath = "storage/todo.json"
+const taskStoragePath = "storage/task.json"
 
 var (
 	onceTodo               sync.Once
@@ -28,7 +28,7 @@ type TaskFileRepository struct {
 	handler fileHandler.FileIOHandler[entity.Task]
 }
 
-func GetTodoFileRepository() *TaskFileRepository {
+func GetTaskFileRepository() *TaskFileRepository {
 	onceTodo.Do(func() {
 		serializer := fileHandler.NewJsonSerializer[entity.Task]()
 		handler := fileHandler.NewJsonIOHandler[entity.Task](taskStoragePath, serializer)
