@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"todo-cli-go/color"
+	"todo-cli-go/pkg/color"
 )
 
 type Category struct {
