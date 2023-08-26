@@ -24,8 +24,9 @@ func main() {
 	initCommand := cmd.CommandBuilder(operation, entityType)
 
 	categoryService := service.BuildCategoryService(user)
+	taskService := service.BuildTaskService(user)
 
-	command := cmd.NewCommand(user, categoryService)
+	command := cmd.NewCommand(user, categoryService, taskService)
 	runCommandLoop(command, initCommand, scanner)
 }
 
