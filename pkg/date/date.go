@@ -48,6 +48,6 @@ func (d Date) String() string {
 	return fmt.Sprintf("%d-%d-%d", d.year, d.day, d.month)
 }
 
-func (d Date) IsSameDate(other *Date) bool {
+func (d Date) IsSameDate(other Date) bool {
 	return d.year == other.year && d.month == other.month && d.day == other.day
 }
