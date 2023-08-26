@@ -1,11 +1,7 @@
 package repository_test
 
-import "errors"
-
-const (
-	ErrOnReading          = "error on reading file"
-	ErrOnWriting          = "error on writing file"
-	ErrOnWritingOrReading = "error on deleting and writing file file"
+import (
+	apperror "todo-cli-go/error"
 )
 
 type MockIOHandler[T any] struct {
@@ -30,26 +26,26 @@ func (h *MockIOHandler[T]) Read() ([]T, error) {
 	if h.config.read {
 		return *h.storage, nil
 	}
-	return nil, errors.New(ErrOnReading)
+	return nil, apperror.ErrOnReading
 }
 func (h *MockIOHandler[T]) WriteOne(data T) error {
 	if h.config.write {
 		*h.storage = append(*h.storage, data)
 		return nil
 	}
-	return errors.New(ErrOnWriting)
+	return apperror.ErrOnWriting
 }
 func (h *MockIOHandler[T]) DeleteAndWrite(data []T) error {
 	if h.config.delete && h.config.write {
 		h.storage = &data
 		return nil
 	}
-	return errors.New(ErrOnWritingOrReading)
+	return apperror.ErrOnWritingOrReading
 }
 func (h *MockIOHandler[T]) DeleteAll() error {
 	if h.config.delete {
 		h.storage = new([]T)
 		return nil
 	}
-	return errors.New(ErrOnWritingOrReading)
+	return apperror.ErrOnWritingOrReading
 }

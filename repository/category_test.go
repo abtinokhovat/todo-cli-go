@@ -1,9 +1,7 @@
 package repository_test
 
 import (
-	"errors"
 	"testing"
-
 	"todo-cli-go/entity"
 	"todo-cli-go/error"
 	"todo-cli-go/repository"
@@ -65,7 +63,7 @@ func TestCategoryRepository_GetByID(t *testing.T) {
 		{
 			"error on read",
 			3,
-			errors.New(ErrOnReading),
+			apperror.ErrOnReading,
 			MockIOConfig{read: false, write: true, delete: true},
 		},
 	}
@@ -115,7 +113,7 @@ func TestCategoryRepository_GetAll(t *testing.T) {
 		},
 		{
 			"error on reading",
-			errors.New(ErrOnReading),
+			apperror.ErrOnReading,
 			&[]entity.Category{},
 			nil,
 			MockIOConfig{read: false, write: true, delete: true},
@@ -178,7 +176,7 @@ func TestCategoryRepository_Create(t *testing.T) {
 				color:  "",
 				userId: 1,
 			},
-			errors.New(ErrOnReading),
+			apperror.ErrOnReading,
 			MockIOConfig{read: false, write: true, delete: true},
 		},
 		{
@@ -192,7 +190,7 @@ func TestCategoryRepository_Create(t *testing.T) {
 				color:  "",
 				userId: 1,
 			},
-			errors.New(ErrOnWriting),
+			apperror.ErrOnWriting,
 			MockIOConfig{read: true, write: false, delete: true},
 		},
 	}
@@ -250,13 +248,13 @@ func TestCategoryRepository_Edit(t *testing.T) {
 			"error on read",
 			updateCategoryRequest{},
 			MockIOConfig{read: false, write: true, delete: true},
-			errors.New(ErrOnReading),
+			apperror.ErrOnReading,
 		},
 		{
 			"error on delete or write",
 			updateCategoryRequest{},
 			MockIOConfig{read: true, write: true, delete: false},
-			errors.New(ErrOnWritingOrReading),
+			apperror.ErrOnWritingOrReading,
 		},
 	}
 

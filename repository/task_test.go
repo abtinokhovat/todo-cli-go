@@ -1,7 +1,6 @@
 package repository_test
 
 import (
-	"errors"
 	"testing"
 
 	"todo-cli-go/entity"
@@ -95,12 +94,12 @@ func TestTodoFileRepository_Create(t *testing.T) {
 		{
 			name:   "error on read on new id",
 			config: MockIOConfig{read: false, write: true, delete: true},
-			err:    errors.New(ErrOnReading),
+			err:    apperror.ErrOnReading,
 		},
 		{
 			name:   "error on write",
 			config: MockIOConfig{read: true, write: false, delete: true},
-			err:    errors.New(ErrOnWriting),
+			err:    apperror.ErrOnWriting,
 		},
 	}
 
@@ -153,13 +152,13 @@ func TestTodoFileRepository_Edit(t *testing.T) {
 		{
 			name:   "error on read",
 			config: MockIOConfig{read: false, write: true, delete: true},
-			err:    errors.New(ErrOnReading),
+			err:    apperror.ErrOnReading,
 		},
 		{
 			name:   "not deleting and writing",
 			config: MockIOConfig{read: true, write: false, delete: false},
 			task:   entity.Task{ID: 4},
-			err:    errors.New(ErrOnWritingOrReading),
+			err:    apperror.ErrOnWritingOrReading,
 		},
 	}
 
@@ -208,7 +207,7 @@ func TestTodoFileRepository_GetById(t *testing.T) {
 		{
 			name:   "error on read",
 			taskID: 2,
-			err:    errors.New(ErrOnReading),
+			err:    apperror.ErrOnReading,
 			config: MockIOConfig{read: false, write: true, delete: true},
 		},
 	}
@@ -259,7 +258,7 @@ func TestTodoFileRepository_GetAll(t *testing.T) {
 		},
 		{
 			"error on reading",
-			errors.New(ErrOnReading),
+			apperror.ErrOnReading,
 			&[]entity.Task{},
 			nil,
 			MockIOConfig{read: false, write: true, delete: true},
