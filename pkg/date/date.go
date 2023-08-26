@@ -3,6 +3,7 @@ package date
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 type Date struct {
@@ -28,6 +29,19 @@ func Validator(year, month, day uint) bool {
 		return false
 	}
 	return true
+}
+
+func Now() *Date {
+	now := time.Now()
+	year := uint(now.Year())
+	month := uint(now.Month())
+	day := uint(now.Day())
+
+	return &Date{
+		year:  year,
+		month: month,
+		day:   day,
+	}
 }
 
 func (d Date) String() string {
