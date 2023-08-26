@@ -12,7 +12,7 @@ type Task struct {
 	DueDate    *date.Date
 	Done       bool
 	CategoryID uint
-	UserId     uint
+	UserID     uint
 }
 
 func NewTask(id uint, title string, done bool, date *date.Date, categoryId, userID uint) *Task {
@@ -22,7 +22,7 @@ func NewTask(id uint, title string, done bool, date *date.Date, categoryId, user
 		DueDate:    date,
 		Done:       done,
 		CategoryID: categoryId,
-		UserId:     userID,
+		UserID:     userID,
 	}
 }
 
