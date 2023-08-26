@@ -1,23 +1,28 @@
 package service_test
 
 import (
+	"errors"
+	"slices"
 	"testing"
-	"todo-cli-go/pkg/date"
 
 	"todo-cli-go/entity"
 	"todo-cli-go/error"
+	"todo-cli-go/pkg/date"
+	"todo-cli-go/service"
 	"todo-cli-go/test/util"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
 	taskStorage = []entity.Task{
 		{
-			ID:         2,
-			Title:      "Complete Golang Assignment",
+			ID:         28,
+			Title:      "Prepare Presentation",
 			DueDate:    nil,
-			Done:       true,
-			CategoryID: 1,
-			UserID:     1,
+			Done:       false,
+			CategoryID: 2,
+			UserID:     2,
 		},
 		{
 			ID:         1,
@@ -28,10 +33,18 @@ var (
 			UserID:     2,
 		},
 		{
+			ID:         2,
+			Title:      "Complete Golang Assignment",
+			DueDate:    nil,
+			Done:       true,
+			CategoryID: 1,
+			UserID:     1,
+		},
+		{
 			ID:         4,
 			Title:      "testable",
 			DueDate:    util_test.GetDate(2024, 11, 27),
-			Done:       false,
+			Done:       true,
 			CategoryID: 0,
 			UserID:     2,
 		},
@@ -106,16 +119,26 @@ func TestTaskService_Create(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
+			var haveError bool
+			if errors.Is(tc.err, errRepo) {
+				haveError = true
+			}
+
+			repo := NewMockTaskRepository(haveError)
+			srv := service.NewTaskService(&entity.User{ID: 2}, repo)
+
 			// 2. execution
+			task, err := srv.Create(tc.task.Title, tc.task.DueDate, tc.task.CategoryID)
+
 			// 3. assertion
 			if tc.err != nil {
 				// check for errors
+				assert.Equal(t, tc.err, err)
 			} else {
 				// error free test cases
+				assert.NoError(t, err)
+				assert.True(t, slices.Contains(taskStorage, *task))
 			}
-
-			// TODO: implement me
-			panic("implement me")
 		})
 	}
 }
@@ -129,7 +152,7 @@ func TestTaskService_Edit(t *testing.T) {
 		{
 			name: "ordinary edit",
 			task: entity.Task{
-				ID:      2,
+				ID:      1,
 				Title:   "Updated",
 				DueDate: util_test.GetDate(2025, 12, 2),
 				Done:    true,
@@ -147,7 +170,7 @@ func TestTaskService_Edit(t *testing.T) {
 		},
 		{
 			name: "repo error",
-			task: entity.Task{ID: 120},
+			task: entity.Task{ID: 1},
 			err:  errRepo,
 		},
 	}
@@ -155,51 +178,75 @@ func TestTaskService_Edit(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
+			var haveError bool
+			if errors.Is(tc.err, errRepo) {
+				haveError = true
+			}
+
+			repo := NewMockTaskRepository(haveError)
+			srv := service.NewTaskService(&entity.User{ID: 2}, repo)
+
 			// 2. execution
+			editedTask, err := srv.Edit(tc.task.ID, tc.task.Title, tc.task.Done, tc.task.DueDate, tc.task.CategoryID)
+
 			// 3. assertion
 			if tc.err != nil {
 				// check for errors
+				assert.Equal(t, tc.err, err)
 			} else {
 				// error free test cases
-			}
+				assert.NoError(t, err)
 
-			// TODO: implement me
-			panic("implement me")
+				assert.Equal(t, editedTask.Title, tc.task.Title)
+				assert.Equal(t, editedTask.Done, tc.task.Done)
+				assert.Equal(t, editedTask.DueDate, tc.task.DueDate)
+				assert.Equal(t, editedTask.CategoryID, tc.task.CategoryID)
+			}
 		})
 	}
 }
 
 func TestTaskService_Get(t *testing.T) {
 	testCases := []struct {
-		name      string
-		userID    uint
-		err       error
-		repoError bool
+		name   string
+		userID uint
+		err    error
 	}{
 		{
 			name:   "ordinary get",
 			userID: 2,
 		},
 		{
-			name:      "repo error",
-			err:       errRepo,
-			repoError: true,
+			name: "repo error",
+			err:  errRepo,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
+			var haveError bool
+			if errors.Is(tc.err, errRepo) {
+				haveError = true
+			}
+
+			repo := NewMockTaskRepository(haveError)
+			srv := service.NewTaskService(&entity.User{ID: tc.userID}, repo)
+
 			// 2. execution
+			tasks, err := srv.Get()
+
 			// 3. assertion
 			if tc.err != nil {
 				// check for errors
+				assert.Equal(t, tc.err, err)
 			} else {
 				// error free test cases
+				assert.NoError(t, err)
+				for _, task := range tasks {
+					assert.Equal(t, tc.userID, task.UserID)
+				}
 			}
-
-			// TODO: implement me
-			panic("implement me")
 		})
 	}
 }
@@ -230,16 +277,31 @@ func TestTaskService_GetByDate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
+			var haveError bool
+			if errors.Is(tc.err, errRepo) {
+				haveError = true
+			}
+
+			userID := uint(2)
+
+			repo := NewMockTaskRepository(haveError)
+			srv := service.NewTaskService(&entity.User{ID: userID}, repo)
+
 			// 2. execution
+			tasks, err := srv.GetByDate(tc.date)
+
 			// 3. assertion
 			if tc.err != nil {
 				// check for errors
+				assert.Equal(t, tc.err, err)
 			} else {
 				// error free test cases
+				assert.NoError(t, err)
+				for _, task := range tasks {
+					assert.Equal(t, task.UserID, userID)
+					assert.Equal(t, task.DueDate, tc.date)
+				}
 			}
-
-			// TODO: implement me
-			panic("implement me")
 		})
 	}
 }
@@ -263,16 +325,31 @@ func TestTaskService_GetToday(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
+			var haveError bool
+			if errors.Is(tc.err, errRepo) {
+				haveError = true
+			}
+
+			userID := uint(2)
+
+			repo := NewMockTaskRepository(haveError)
+			srv := service.NewTaskService(&entity.User{ID: userID}, repo)
+
 			// 2. execution
+			tasks, err := srv.GetTodayTasks()
+
 			// 3. assertion
 			if tc.err != nil {
 				// check for errors
+				assert.Equal(t, tc.err, err)
 			} else {
 				// error free test cases
+				assert.NoError(t, err)
+				for _, task := range tasks {
+					assert.Equal(t, task.UserID, userID)
+					assert.Equal(t, task.DueDate, date.Now())
+				}
 			}
-
-			// TODO: implement me
-			panic("implement me")
 		})
 	}
 
@@ -280,15 +357,23 @@ func TestTaskService_GetToday(t *testing.T) {
 
 func TestTaskService_Toggle(t *testing.T) {
 	testCases := []struct {
-		name   string
-		taskID uint
-		user   entity.User
-		err    error
+		name     string
+		taskID   uint
+		user     entity.User
+		expected bool
+		err      error
 	}{
 		{
-			name:   "ordinary toggle",
-			taskID: 1,
-			user:   entity.User{ID: 2},
+			name:     "ordinary toggle",
+			taskID:   28,
+			expected: true,
+			user:     entity.User{ID: 2},
+		},
+		{
+			name:     "ordinary toggle 2",
+			taskID:   4,
+			expected: false,
+			user:     entity.User{ID: 2},
 		},
 		{
 			name:   "not available task",
@@ -311,22 +396,39 @@ func TestTaskService_Toggle(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
+			var haveError bool
+			if errors.Is(tc.err, errRepo) {
+				haveError = true
+			}
+
+			repo := NewMockTaskRepository(haveError)
+			srv := service.NewTaskService(&entity.User{ID: tc.user.ID}, repo)
+
 			// 2. execution
+			err := srv.Toggle(tc.taskID)
+
 			// 3. assertion
 			if tc.err != nil {
 				// check for errors
+				assert.Equal(t, tc.err, err)
 			} else {
-				// error free test cases
-			}
+				afterToggle, err := repo.GetByID(tc.taskID)
+				afterStatus := afterToggle.Done
 
-			// TODO: implement me
-			panic("implement me")
+				// error free test cases
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expected, afterStatus)
+			}
 		})
 	}
 }
 
 type MockTaskRepository struct {
 	haveError bool
+}
+
+func NewMockTaskRepository(haveError bool) *MockTaskRepository {
+	return &MockTaskRepository{haveError: haveError}
 }
 
 func (r *MockTaskRepository) Create(title string, date *date.Date, categoryID, userID uint) (*entity.Task, error) {
@@ -350,7 +452,10 @@ func (r *MockTaskRepository) Edit(id uint, title string, done bool, date *date.D
 			taskStorage[i].Done = done
 			taskStorage[i].DueDate = date
 			taskStorage[i].CategoryID = categoryID
+
+			return &taskStorage[i], nil
 		}
+
 	}
 
 	return nil, apperror.ErrTaskNotFoundToEdit
