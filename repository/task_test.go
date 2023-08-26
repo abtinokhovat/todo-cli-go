@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"testing"
+	util_test "todo-cli-go/test/util"
 
 	"todo-cli-go/entity"
 	"todo-cli-go/error"
@@ -23,7 +24,7 @@ var taskStorage = []entity.Task{
 	{
 		ID:         1,
 		Title:      "Prepare Presentation",
-		DueDate:    getDate(2024, 11, 27),
+		DueDate:    util_test.GetDate(2024, 11, 27),
 		Done:       false,
 		CategoryID: 2,
 		UserID:     2,
@@ -31,7 +32,7 @@ var taskStorage = []entity.Task{
 	{
 		ID:         4,
 		Title:      "testable",
-		DueDate:    getDate(2024, 11, 27),
+		DueDate:    util_test.GetDate(2024, 11, 27),
 		Done:       false,
 		CategoryID: 0,
 		UserID:     2,
@@ -139,7 +140,7 @@ func TestTodoFileRepository_Edit(t *testing.T) {
 			task: entity.Task{
 				ID:      4,
 				Title:   "Updated",
-				DueDate: getDate(2025, 12, 2),
+				DueDate: util_test.GetDate(2025, 12, 2),
 				Done:    true,
 			},
 		},
@@ -283,9 +284,4 @@ func TestTodoFileRepository_GetAll(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getDate(year, month, day uint) *date.Date {
-	d, _ := date.NewDate(year, month, day)
-	return d
 }
