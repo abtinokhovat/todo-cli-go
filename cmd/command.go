@@ -135,21 +135,33 @@ func (c *Command) createTask() {
 	if dueDateStr != "" {
 		d, err := date.NewDateFromString(dueDateStr)
 		dueDate = d
-		printErr(err)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	categoryID, err := c.scanID("if you want to assign task to a category enter the category's id or press enter")
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	created, err := c.taskService.Create(title, dueDate, categoryID)
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	fmt.Println(created.String())
 
 }
 func (c *Command) listTask() {
 	tasks, err := c.taskService.Get()
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	if len(tasks) == 0 {
 		fmt.Println("no task, you can create one")
@@ -161,7 +173,10 @@ func (c *Command) listTask() {
 }
 func (c *Command) listTaskToday() {
 	tasks, err := c.taskService.GetTodayTasks()
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	if len(tasks) == 0 {
 		fmt.Println("no tasks for today, phew")
@@ -176,10 +191,16 @@ func (c *Command) listTaskByDate() {
 	dateStr := c.scan("enter a date for searching in tasks")
 	// make a date object from date string
 	sDate, err := date.NewDateFromString(dateStr)
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	tasks, err := c.taskService.GetByDate(*sDate)
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	if len(tasks) == 0 {
 		fmt.Println("no tasks in the date you requested")
@@ -194,10 +215,16 @@ func (c *Command) editTask() {
 }
 func (c *Command) toggleTask() {
 	taskID, err := c.scanID("enter a task id for toggling")
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	err = c.taskService.Toggle(taskID)
-	printErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	fmt.Println("done.")
 }
@@ -217,11 +244,4 @@ func (c *Command) scanID(message string) (uint, error) {
 	}
 
 	return uint(id), nil
-}
-
-func printErr(err error) {
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 }
