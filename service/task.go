@@ -70,6 +70,21 @@ func (s *TaskService) Get() ([]entity.Task, error) {
 	return userTasks, nil
 }
 
+func (s *TaskService) GetByID(id uint) (*entity.Task, error) {
+	tasks, err := s.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, task := range tasks {
+		if task.ID == id {
+			return &task, nil
+		}
+	}
+
+	return nil, apperror.ErrTaskNotFound
+}
+
 func (s *TaskService) GetTodayTasks() ([]entity.Task, error) {
 	today := date.Now()
 	todayTasks, err := s.GetByDate(*today)
