@@ -7,12 +7,12 @@ import (
 )
 
 type Task struct {
-	ID         uint
-	Title      string
-	DueDate    *date.Date
-	Done       bool
-	CategoryID uint
-	UserID     uint
+	ID         uint       `json:"id,omitempty"`
+	Title      string     `json:"title,omitempty"`
+	DueDate    *date.Date `json:"due_date,omitempty"`
+	Done       bool       `json:"done,omitempty"`
+	CategoryID uint       `json:"category_id,omitempty"`
+	UserID     uint       `json:"user_id,omitempty"`
 }
 
 func NewTask(id uint, title string, done bool, date *date.Date, categoryId, userID uint) *Task {
