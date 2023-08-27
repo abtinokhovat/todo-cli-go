@@ -46,6 +46,17 @@ func (s *TaskService) Edit(id uint, title string, done bool, dueDate *date.Date,
 		return nil, apperror.ErrUnauthorized
 	}
 
+	// don't update fields if they were with zero values
+	if title == "" {
+		title = task.Title
+	}
+	if dueDate == nil {
+		dueDate = task.DueDate
+	}
+	if categoryID == 0 {
+		categoryID = task.CategoryID
+	}
+
 	edited, err := s.repo.Edit(id, title, done, dueDate, categoryID)
 	if err != nil {
 		return nil, err
