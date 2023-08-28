@@ -76,7 +76,7 @@ func Now() *Date {
 }
 
 func (d *Date) String() string {
-	return fmt.Sprintf("%d-%d-%d", d.year, d.day, d.month)
+	return fmt.Sprintf("%d-%d-%d", d.year, d.month, d.day)
 }
 
 func (d *Date) IsSameDate(other Date) bool {
