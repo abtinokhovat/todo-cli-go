@@ -9,6 +9,13 @@ import (
 	"todo-cli-go/repository"
 )
 
+type TaskUpdate struct {
+	Title      *string
+	Done       *bool
+	DueDate    *date.Date
+	CategoryID *uint
+}
+
 type TaskService struct {
 	user *entity.User
 	repo repository.TaskStorageAdapter
@@ -34,7 +41,7 @@ func (s *TaskService) Create(title string, dueDate *date.Date, categoryID uint) 
 	return task, nil
 }
 
-func (s *TaskService) Edit(id uint, title string, done bool, dueDate *date.Date, categoryID uint) (*entity.Task, error) {
+func (s *TaskService) Edit(id uint, update TaskUpdate) (*entity.Task, error) {
 	task, err := s.repo.GetByID(id)
 	if errors.Is(err, apperror.ErrTaskNotFound) {
 		return nil, apperror.ErrTaskNotFoundToEdit
@@ -47,17 +54,20 @@ func (s *TaskService) Edit(id uint, title string, done bool, dueDate *date.Date,
 	}
 
 	// don't update fields if they were with zero values
-	if title == "" {
-		title = task.Title
+	if update.Done != nil {
+		task.Done = *update.Done
 	}
-	if dueDate == nil {
-		dueDate = task.DueDate
+	if update.Title != nil {
+		task.Title = *update.Title
 	}
-	if categoryID == 0 {
-		categoryID = task.CategoryID
+	if update.DueDate != nil {
+		task.DueDate = update.DueDate
+	}
+	if update.CategoryID != nil {
+		task.CategoryID = *update.CategoryID
 	}
 
-	edited, err := s.repo.Edit(id, title, done, dueDate, categoryID)
+	edited, err := s.repo.Edit(id, task.Title, task.Done, task.DueDate, task.CategoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -139,8 +149,12 @@ func (s *TaskService) Toggle(id uint) error {
 		isDone = true
 	}
 
+	updateReq := TaskUpdate{
+		Done: &isDone,
+	}
+
 	// edit the task with toggled isDone
-	_, err = s.Edit(id, task.Title, isDone, task.DueDate, task.CategoryID)
+	_, err = s.Edit(id, updateReq)
 
 	return err
 }
