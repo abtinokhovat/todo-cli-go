@@ -29,6 +29,10 @@ func NewDate(year, month, day uint) (*Date, error) {
 }
 
 func NewDateFromString(str string) (*Date, error) {
+	if str == "" {
+		return nil, nil
+	}
+
 	data := strings.Split(str, "-")
 
 	if len(data) != 3 {
@@ -80,11 +84,10 @@ func (d *Date) IsSameDate(other Date) bool {
 }
 
 func (d *Date) MarshalJSON() ([]byte, error) {
-	return []byte(d.String()), nil
+	return []byte("\"" + d.String() + "\""), nil
 }
 
 func (d *Date) UnmarshalJSON(data []byte) error {
-
 	str := string(data)
 	str = strings.ReplaceAll(str, "\"", "")
 	parts := strings.Split(str, "-")
