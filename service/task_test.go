@@ -53,7 +53,7 @@ var (
 			Title:      "shopping",
 			DueDate:    util_test.GetDate(2024, 11, 27),
 			Done:       true,
-			CategoryID: 0,
+			CategoryID: 1,
 			UserID:     2,
 		},
 		{
@@ -146,31 +146,68 @@ func TestTaskService_Create(t *testing.T) {
 func TestTaskService_Edit(t *testing.T) {
 	testCases := []struct {
 		name string
-		task entity.Task
+		id   uint
+		task service.TaskUpdate
 		err  error
 	}{
 		{
 			name: "ordinary edit",
-			task: entity.Task{
-				ID:      1,
-				Title:   "Updated",
+			id:   1,
+			task: service.TaskUpdate{
+				Title:      pointer("Updated"),
+				DueDate:    util_test.GetDate(2025, 12, 2),
+				Done:       pointer(true),
+				CategoryID: pointer[uint](12),
+			},
+		},
+		{
+			name: "just edit title",
+			id:   28,
+			task: service.TaskUpdate{
+				Title: pointer("Updated"),
+			},
+		},
+		{
+			name: "just edit due date",
+			id:   1,
+			task: service.TaskUpdate{
 				DueDate: util_test.GetDate(2025, 12, 2),
-				Done:    true,
+			},
+		},
+		{
+			name: "remove category id",
+			id:   5,
+			task: service.TaskUpdate{
+				CategoryID: pointer[uint](0),
+			},
+		},
+		{
+			name: "just edit done",
+			id:   1,
+			task: service.TaskUpdate{
+				Done: pointer(true),
+			},
+		},
+		{
+			name: "just edit category id",
+			id:   1,
+			task: service.TaskUpdate{
+				CategoryID: pointer[uint](12),
 			},
 		},
 		{
 			name: "not available task edit",
-			task: entity.Task{ID: 120},
+			id:   120,
 			err:  apperror.ErrTaskNotFoundToEdit,
 		},
 		{
 			name: "not authorized to edit task",
-			task: entity.Task{ID: 2},
+			id:   2,
 			err:  apperror.ErrUnauthorized,
 		},
 		{
 			name: "repo error",
-			task: entity.Task{ID: 1},
+			id:   1,
 			err:  errRepo,
 		},
 	}
@@ -187,20 +224,38 @@ func TestTaskService_Edit(t *testing.T) {
 			srv := service.NewTaskService(&entity.User{ID: 2}, repo)
 
 			// 2. execution
-			editedTask, err := srv.Edit(tc.task.ID, tc.task.Title, tc.task.Done, tc.task.DueDate, tc.task.CategoryID)
+			beforeEdit, _ := srv.GetByID(tc.id)
+			editedTask, err := srv.Edit(tc.id, tc.task)
 
 			// 3. assertion
 			if tc.err != nil {
 				// check for errors
 				assert.Equal(t, tc.err, err)
 			} else {
-				// error free test cases
-				assert.NoError(t, err)
+				// check if the value was in update query and if it was not check the previous value
+				if tc.task.Title == nil {
+					assert.Equal(t, beforeEdit.Title, editedTask.Title)
+				} else {
+					assert.Equal(t, *tc.task.Title, editedTask.Title)
+				}
 
-				assert.Equal(t, editedTask.Title, tc.task.Title)
-				assert.Equal(t, editedTask.Done, tc.task.Done)
-				assert.Equal(t, editedTask.DueDate, tc.task.DueDate)
-				assert.Equal(t, editedTask.CategoryID, tc.task.CategoryID)
+				if tc.task.Done == nil {
+					assert.Equal(t, beforeEdit.Done, editedTask.Done)
+				} else {
+					assert.Equal(t, *tc.task.Done, editedTask.Done)
+				}
+
+				if tc.task.DueDate == nil {
+					assert.Equal(t, beforeEdit.DueDate, editedTask.DueDate)
+				} else {
+					assert.Equal(t, *tc.task.DueDate, *editedTask.DueDate)
+				}
+
+				if tc.task.CategoryID == nil {
+					assert.Equal(t, beforeEdit.CategoryID, editedTask.CategoryID)
+				} else {
+					assert.Equal(t, *tc.task.CategoryID, editedTask.CategoryID)
+				}
 			}
 		})
 	}
@@ -421,6 +476,10 @@ func TestTaskService_Toggle(t *testing.T) {
 			}
 		})
 	}
+}
+
+func pointer[T any](value T) *T {
+	return &value
 }
 
 type MockTaskRepository struct {
