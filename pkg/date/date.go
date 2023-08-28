@@ -18,7 +18,7 @@ type Date struct {
 
 func NewDate(year, month, day uint) (*Date, error) {
 	if !Validator(year, month, day) {
-		return nil, errors.New("not correct format")
+		return nil, apperror.ErrNotInACorrectFormat
 	}
 
 	return &Date{
@@ -27,7 +27,6 @@ func NewDate(year, month, day uint) (*Date, error) {
 		day:   day,
 	}, nil
 }
-
 func NewDateFromString(str string) (*Date, error) {
 	if str == "" {
 		return nil, nil
@@ -76,17 +75,14 @@ func Now() *Date {
 }
 
 func (d *Date) String() string {
-	return fmt.Sprintf("%d-%d-%d", d.year, d.month, d.day)
+	return fmt.Sprintf("%d-%02d-%02d", d.year, d.month, d.day)
 }
-
 func (d *Date) IsSameDate(other Date) bool {
 	return d.year == other.year && d.month == other.month && d.day == other.day
 }
-
 func (d *Date) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + d.String() + "\""), nil
 }
-
 func (d *Date) UnmarshalJSON(data []byte) error {
 	str := string(data)
 	str = strings.ReplaceAll(str, "\"", "")

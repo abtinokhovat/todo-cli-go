@@ -45,7 +45,6 @@ func GetColor(str string) Color {
 func Colorf(color Color, format string, a ...interface{}) string {
 	return fmt.Sprintf("%s%s%s", color, fmt.Sprintf(format, a...), Reset)
 }
-
 func Colorln(color Color, a ...interface{}) string {
 	return fmt.Sprintf("%s%s%s\n", color, fmt.Sprint(a...), Reset)
 }
