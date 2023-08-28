@@ -9,7 +9,6 @@ import (
 
 const (
 	categoryStoragePath = "storage/category.json"
-	NoCategory          = 0
 )
 
 var (
