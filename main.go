@@ -7,16 +7,18 @@ import (
 
 	"todo-cli-go/cmd"
 	"todo-cli-go/entity"
+	"todo-cli-go/pkg/scanner"
 	"todo-cli-go/service"
 )
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
-	authService := service.BuildUserService()
+	scn := bufio.NewScanner(os.Stdin)
 
 	entityType, operation := parseArgs(os.Args)
 
-	user := handleAuthentication(scanner, authService, entityType, operation)
+	authService := service.BuildUserService()
+
+	user := handleAuthentication(authService, entityType, operation, scn)
 	if user == nil {
 		return
 	}
@@ -53,17 +55,17 @@ func parseArgs(args []string) (string, string) {
 	return entityType, operation
 }
 
-func handleAuthentication(scanner *bufio.Scanner, authService service.AuthService, entityType, operation string) *entity.User {
+func handleAuthentication(authService service.AuthService, entityType, operation string, scanner *bufio.Scanner) *entity.User {
 	if operation == "register" && entityType == "user" {
-		return registerAndLogin(scanner, authService)
+		return registerAndLogin(authService, scanner)
 	}
 
-	return login(scanner, authService)
+	return login(authService, scanner)
 }
 
-func login(scanner *bufio.Scanner, authService service.AuthService) *entity.User {
-	email := cmd.Scan(scanner, "Enter your email address")
-	password := cmd.Scan(scanner, "Enter your password")
+func login(authService service.AuthService, scn *bufio.Scanner) *entity.User {
+	email := scanner.Scan(scn, "Enter your email address")
+	password := scanner.Scan(scn, "Enter your password")
 
 	user, err := authService.Login(email, password)
 	if err != nil {
@@ -73,9 +75,9 @@ func login(scanner *bufio.Scanner, authService service.AuthService) *entity.User
 	return user
 }
 
-func registerAndLogin(scanner *bufio.Scanner, authService service.AuthService) *entity.User {
-	email := cmd.Scan(scanner, "Enter your email address")
-	password := cmd.Scan(scanner, "Enter your password")
+func registerAndLogin(authService service.AuthService, scn *bufio.Scanner) *entity.User {
+	email := scanner.Scan(scn, "Enter your email address")
+	password := scanner.Scan(scn, "Enter your password")
 
 	_, err := authService.Register(email, password)
 	if err != nil {
@@ -88,15 +90,4 @@ func registerAndLogin(scanner *bufio.Scanner, authService service.AuthService) *
 	}
 
 	return user
-}
-
-func runCommandLoop(command *cmd.Puppeteer, initCommand string, scanner *bufio.Scanner) {
-	if initCommand != "register-user" {
-		command.Execute(initCommand)
-	}
-
-	for {
-		commandString := cmd.Scan(scanner, "Enter the command you want to execute")
-		command.Execute(commandString)
-	}
 }

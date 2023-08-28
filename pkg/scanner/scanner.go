@@ -1,29 +1,43 @@
 package scanner
 
 import (
-	"bufio"
+	"fmt"
 	"strconv"
-	"todo-cli-go/cmd"
 
 	"todo-cli-go/error"
-	"todo-cli-go/repository"
 )
 
-type Scanner struct {
-	scanner *bufio.Scanner
+const NoID = 0
+
+// BufScanner interface to mock bufio.Scanner methods.
+type BufScanner interface {
+	Scan() bool
+	Text() string
+	Err() error
 }
 
-func NewScanner(scanner *bufio.Scanner) *Scanner {
+func Scan(scanner BufScanner, message string) string {
+	fmt.Println(message)
+	scanner.Scan()
+	fmt.Println()
+	return scanner.Text()
+}
+
+type Scanner struct {
+	scanner BufScanner
+}
+
+func NewScanner(scanner BufScanner) *Scanner {
 	return &Scanner{scanner: scanner}
 }
 
 func (s *Scanner) Scan(message string) string {
-	return cmd.Scan(s.scanner, message)
+	return Scan(s.scanner, message)
 }
 func (s *Scanner) ScanID(message string) (uint, error) {
 	scanned := s.Scan(message)
 	if scanned == "" {
-		return repository.NoCategory, nil
+		return NoID, nil
 	}
 
 	id, err := strconv.Atoi(scanned)
