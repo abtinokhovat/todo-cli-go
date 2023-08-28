@@ -26,7 +26,7 @@ func main() {
 	categoryService := service.BuildCategoryService(user)
 	taskService := service.BuildTaskService(user)
 
-	command := cmd.NewCommand(user, categoryService, taskService)
+	command := cmd.NewPuppeteer(categoryService, taskService)
 	runCommandLoop(command, initCommand, scanner)
 }
 
@@ -81,7 +81,7 @@ func registerAndLogin(scanner *bufio.Scanner, authService service.AuthService) *
 	return user
 }
 
-func runCommandLoop(command *cmd.Command, initCommand string, scanner *bufio.Scanner) {
+func runCommandLoop(command *cmd.Puppeteer, initCommand string, scanner *bufio.Scanner) {
 	if initCommand != "register-user" {
 		command.Execute(initCommand)
 	}
