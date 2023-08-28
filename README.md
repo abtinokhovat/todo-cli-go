@@ -53,12 +53,12 @@
 - [X] User can see the list of categories
 
 ### task related
-- [ ] User can add a new task
-- [ ] User can Edit a task
-- [ ] User can see the List of its tasks
-- [ ] User can see the Today’s Tasks
-- [ ] User can see the Tasks by date
-- [ ] User can Done/Undone a task
+- [X] User can add a new task
+- [X] User can Edit a task
+- [X] User can see the List of its tasks
+- [X] User can see the Today’s Tasks
+- [X] User can see the Tasks by date
+- [X] User can Done/Undone a task
 
 ### others
 - [ ] User can see progress status
