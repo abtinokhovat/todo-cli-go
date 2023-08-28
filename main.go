@@ -27,7 +27,16 @@ func main() {
 	taskService := service.BuildTaskService(user)
 
 	command := cmd.NewPuppeteer(categoryService, taskService)
-	runCommandLoop(command, initCommand, scanner)
+
+	// running application loop
+	if initCommand != "register-user" {
+		command.Execute(initCommand)
+	}
+
+	for {
+		commandString := scanner.Scan(scn, "Enter the command you want to execute")
+		command.Execute(commandString)
+	}
 }
 
 func parseArgs(args []string) (string, string) {
