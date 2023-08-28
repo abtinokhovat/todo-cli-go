@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"todo-cli-go/error"
+	"todo-cli-go/pkg/scanner"
 	"todo-cli-go/service"
 )
 
 type CategoryPuppet struct {
 	service *service.CategoryService
-	scanner *Scanner
+	scanner *scanner.Scanner
 }
 
-func NewCategoryPuppet(service *service.CategoryService, scanner *Scanner) *CategoryPuppet {
+func NewCategoryPuppet(service *service.CategoryService, scanner *scanner.Scanner) *CategoryPuppet {
 	return &CategoryPuppet{
 		service: service,
 		scanner: scanner,
@@ -21,8 +22,8 @@ func NewCategoryPuppet(service *service.CategoryService, scanner *Scanner) *Cate
 
 func (p *CategoryPuppet) create() {
 
-	title := p.scanner.scan("enter a title for your new category")
-	color := p.scanner.scan("enter a color for your new category")
+	title := p.scanner.Scan("enter a title for your new category")
+	color := p.scanner.Scan("enter a color for your new category")
 
 	category, err := p.service.Create(title, color)
 	if err != nil {
@@ -32,14 +33,14 @@ func (p *CategoryPuppet) create() {
 	fmt.Println(category.String())
 }
 func (p *CategoryPuppet) edit() {
-	id, err := p.scanner.scanID("enter the id of category you want to edit")
+	id, err := p.scanner.ScanID("enter the id of category you want to edit")
 	if err != nil {
 		fmt.Println(apperror.ErrNotCorrectDigit)
 		return
 	}
 
-	title := p.scanner.scan("enter a title for updating")
-	color := p.scanner.scan("enter a color for updating")
+	title := p.scanner.Scan("enter a title for updating")
+	color := p.scanner.Scan("enter a color for updating")
 
 	category, err := p.service.Edit(id, title, color)
 	if err != nil {

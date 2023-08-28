@@ -3,15 +3,16 @@ package cmd
 import (
 	"fmt"
 	"todo-cli-go/pkg/date"
+	scanner2 "todo-cli-go/pkg/scanner"
 	"todo-cli-go/service"
 )
 
 type TaskPuppet struct {
 	service *service.TaskService
-	scanner *Scanner
+	scanner *scanner2.Scanner
 }
 
-func NewTaskPuppet(service *service.TaskService, scanner *Scanner) *TaskPuppet {
+func NewTaskPuppet(service *service.TaskService, scanner *scanner2.Scanner) *TaskPuppet {
 	return &TaskPuppet{
 		service: service,
 		scanner: scanner,
@@ -20,10 +21,10 @@ func NewTaskPuppet(service *service.TaskService, scanner *Scanner) *TaskPuppet {
 
 func (p *TaskPuppet) create() {
 	// scan title
-	title := p.scanner.scan("enter your task title")
+	title := p.scanner.Scan("enter your task title")
 
 	// scan due date
-	dueDateStr := p.scanner.scan("enter a due date for your task and if you don't want to add a date,press enter")
+	dueDateStr := p.scanner.Scan("enter a due date for your task and if you don't want to add a date,press enter")
 	// make a date object from date string
 	var dueDate *date.Date = nil
 
@@ -36,7 +37,7 @@ func (p *TaskPuppet) create() {
 		}
 	}
 
-	categoryID, err := p.scanner.scanID("if you want to assign task to a category enter the category's id or press enter")
+	categoryID, err := p.scanner.ScanID("if you want to assign task to a category enter the category's id or press enter")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -83,7 +84,7 @@ func (p *TaskPuppet) listToday() {
 }
 func (p *TaskPuppet) listByDate() {
 	// scan date
-	dateStr := p.scanner.scan("enter a date for searching in tasks")
+	dateStr := p.scanner.Scan("enter a date for searching in tasks")
 	// make a date object from date string
 	sDate, err := date.NewDateFromString(dateStr)
 	if err != nil {
@@ -106,21 +107,21 @@ func (p *TaskPuppet) listByDate() {
 	}
 }
 func (p *TaskPuppet) edit() {
-	taskId, err := p.scanner.scanID("enter the id task you want to be edited")
+	taskId, err := p.scanner.ScanID("enter the id task you want to be edited")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	title := p.scanner.scan("enter a title for updating your task and if you dont want to update press enter")
-	dueDateStr := p.scanner.scan("enter a due date for updating your task and if you dont want to update press enter")
+	title := p.scanner.Scan("enter a title for updating your task and if you dont want to update press enter")
+	dueDateStr := p.scanner.Scan("enter a due date for updating your task and if you dont want to update press enter")
 	dueDate, err := date.NewDateFromString(dueDateStr)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	categoryID, err := p.scanner.scanID("enter a category id for updating your task and if you dont want to update press enter")
+	categoryID, err := p.scanner.ScanID("enter a category id for updating your task and if you dont want to update press enter")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -150,7 +151,7 @@ func (p *TaskPuppet) edit() {
 
 }
 func (p *TaskPuppet) toggle() {
-	taskID, err := p.scanner.scanID("enter a task id for toggling")
+	taskID, err := p.scanner.ScanID("enter a task id for toggling")
 	if err != nil {
 		fmt.Println(err)
 		return
