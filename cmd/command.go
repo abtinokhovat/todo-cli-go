@@ -211,7 +211,48 @@ func (c *Command) listTaskByDate() {
 	}
 }
 func (c *Command) editTask() {
-	fmt.Println("edit-task")
+	taskId, err := c.scanID("enter the id task you want to be edited")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	title := c.scan("enter a title for updating your task and if you dont want to update press enter")
+	dueDateStr := c.scan("enter a due date for updating your task and if you dont want to update press enter")
+	dueDate, err := date.NewDateFromString(dueDateStr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	categoryID, err := c.scanID("enter a category id for updating your task and if you dont want to update press enter")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	task := service.TaskUpdate{
+		Title:      &title,
+		DueDate:    dueDate,
+		CategoryID: &categoryID,
+	}
+
+	// check if they are empty pass nil in order to skip updating nil fields
+	if title == "" {
+		task.Title = nil
+	}
+	if categoryID == 0 {
+		task.CategoryID = nil
+	}
+
+	edited, err := c.taskService.Edit(taskId, task)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(edited)
+
 }
 func (c *Command) toggleTask() {
 	taskID, err := c.scanID("enter a task id for toggling")
