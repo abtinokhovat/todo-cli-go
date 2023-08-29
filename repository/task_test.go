@@ -2,12 +2,12 @@ package repository_test
 
 import (
 	"testing"
-	util_test "todo-cli-go/test/util"
 
 	"todo-cli-go/entity"
 	"todo-cli-go/error"
 	"todo-cli-go/pkg/date"
 	"todo-cli-go/repository"
+	"todo-cli-go/test/util"
 
 	"github.com/stretchr/testify/assert"
 )

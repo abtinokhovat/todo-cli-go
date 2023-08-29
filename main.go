@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 
 	"todo-cli-go/cmd"
@@ -12,22 +11,31 @@ import (
 )
 
 func main() {
-	scn := bufio.NewScanner(os.Stdin)
+	// build a scanner for entire application
+	scn := scanner.NewScanner(bufio.NewScanner(os.Stdin))
 
+	// parse entity and operation
 	entityType, operation := parseArgs(os.Args)
 
+	// build the auth service
 	authService := service.BuildUserService()
+	// build the auth puppet
+	authPuppet := cmd.NewAuthPuppet(authService, scn)
 
-	user := handleAuthentication(authService, entityType, operation, scn)
+	// handle login and register flow and don't let the user go further if login failed
+	user := handleAuthentication(authPuppet, entityType, operation)
 	if user == nil {
 		return
 	}
 
+	// run the init command
 	initCommand := cmd.CommandBuilder(operation, entityType)
 
+	// build task and category services
 	categoryService := service.BuildCategoryService(user)
 	taskService := service.BuildTaskService(user)
 
+	// build the master puppet for directing the puppets
 	command := cmd.NewPuppeteer(categoryService, taskService)
 
 	// running application loop
@@ -36,7 +44,7 @@ func main() {
 	}
 
 	for {
-		commandString := scanner.Scan(scn, "Enter the command you want to execute")
+		commandString := scn.Scan("Enter the command you want to execute")
 		command.Execute(commandString)
 	}
 }
@@ -55,39 +63,10 @@ func parseArgs(args []string) (string, string) {
 	return entityType, operation
 }
 
-func handleAuthentication(authService service.AuthService, entityType, operation string, scanner *bufio.Scanner) *entity.User {
+func handleAuthentication(authPuppet *cmd.AuthPuppet, entityType, operation string) *entity.User {
 	if operation == "register" && entityType == "user" {
-		return registerAndLogin(authService, scanner)
+		return authPuppet.RegisterAndLogin()
 	}
 
-	return login(authService, scanner)
-}
-
-func login(authService service.AuthService, scn *bufio.Scanner) *entity.User {
-	email := scanner.Scan(scn, "Enter your email address")
-	password := scanner.Scan(scn, "Enter your password")
-
-	user, err := authService.Login(email, password)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return user
-}
-
-func registerAndLogin(authService service.AuthService, scn *bufio.Scanner) *entity.User {
-	email := scanner.Scan(scn, "Enter your email address")
-	password := scanner.Scan(scn, "Enter your password")
-
-	_, err := authService.Register(email, password)
-	if err != nil {
-		fmt.Println("Error on registering user:", err)
-	}
-
-	user, err := authService.Login(email, password)
-	if err != nil {
-		fmt.Println("Error on logging in user:", err)
-	}
-
-	return user
+	return authPuppet.Login()
 }
