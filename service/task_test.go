@@ -538,3 +538,36 @@ func (r *MockTaskRepository) GetAll() ([]entity.Task, error) {
 	}
 	return taskStorage, nil
 }
+
+type mockCategoryValidator struct {
+	config mockCategoryValidatorConfig
+}
+
+type mockCategoryValidatorConfig struct {
+	// accept is true when category is owned by user
+	accept bool
+	// serviceErr is true to mock the service err
+	serviceErr bool
+	// if found is false the mocker will return not found err
+	found bool
+}
+
+func NewMockCategoryValidator(config mockCategoryValidatorConfig) service.CategoryValidator {
+	return &mockCategoryValidator{config: config}
+}
+
+func (m mockCategoryValidator) IsUserCategory(userID, categoryID uint) (bool, error) {
+	if m.config.serviceErr {
+		return false, serviceErr
+	}
+	if categoryID == scanner.NoID {
+		return true, nil
+	}
+	if !m.config.found {
+		return false, apperror.ErrCategoryNotFound
+	}
+	if m.config.accept {
+		return true, nil
+	}
+	return false, apperror.ErrUnauthorized
+}
