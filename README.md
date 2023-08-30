@@ -61,7 +61,7 @@
 - [X] User can Done/Undone a task
 
 ### others
-- [ ] User can see progress status
+- [X] User can see progress status
 
 ---
 
