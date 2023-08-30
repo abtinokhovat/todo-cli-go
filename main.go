@@ -33,7 +33,8 @@ func main() {
 
 	// build task and category services
 	categoryService := service.BuildCategoryService(user)
-	taskService := service.BuildTaskService(user)
+	categoryValidationService := service.NewCategoryValidationService(categoryService)
+	taskService := service.BuildTaskService(user, categoryValidationService)
 
 	// build the master puppet for directing the puppets
 	command := cmd.NewPuppeteer(categoryService, taskService)
