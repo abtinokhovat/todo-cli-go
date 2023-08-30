@@ -540,6 +540,7 @@ func pointer[T any](value T) *T {
 	return &value
 }
 
+// a mocker for task repository
 type MockTaskRepository struct {
 	haveError bool
 }
@@ -597,6 +598,7 @@ func (r *MockTaskRepository) GetAll() ([]entity.Task, error) {
 	return taskStorage, nil
 }
 
+// a mocker for category validator service
 type mockCategoryValidator struct {
 	config mockCategoryValidatorConfig
 }

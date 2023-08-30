@@ -16,6 +16,16 @@ type TaskUpdate struct {
 	CategoryID *uint
 }
 
+type TaskMaster interface {
+	Create(title string, dueDate *date.Date, categoryID uint) (*entity.Task, error)
+	Edit(id uint, update TaskUpdate) (*entity.Task, error)
+	Get() ([]entity.Task, error)
+	GetByID(id uint) (*entity.Task, error)
+	GetTodayTasks() ([]entity.Task, error)
+	GetByDate(date date.Date) ([]entity.Task, error)
+	Toggle(id uint) error
+}
+
 type TaskService struct {
 	user              *entity.User
 	repo              repository.TaskStorageAdapter
