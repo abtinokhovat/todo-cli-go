@@ -3,27 +3,27 @@ package entity
 import "bytes"
 
 type Status struct {
-	category Category
-	tasks    []Task
+	Category Category
+	Tasks    []Task
 }
 
 func NewStatus(category Category, task []Task) *Status {
 	return &Status{
-		category: category,
-		tasks:    task,
+		Category: category,
+		Tasks:    task,
 	}
 }
 
 func (s Status) String() string {
 	var buffer bytes.Buffer
-	buffer.WriteString(s.category.String())
+	buffer.WriteString(s.Category.String())
 
-	if len(s.tasks) == 0 {
+	if len(s.Tasks) == 0 {
 		buffer.WriteString("\n")
 		buffer.WriteString("empty!")
 	}
 
-	for _, task := range s.tasks {
+	for _, task := range s.Tasks {
 		buffer.WriteString("\n")
 		buffer.WriteString(task.String())
 	}
