@@ -13,6 +13,16 @@ func NewStatusPuppet(status service.StatusMaster) *StatusPuppet {
 	return &StatusPuppet{statusMaster: status}
 }
 
+func (p StatusPuppet) Done() {
+	doneStats, err := p.statusMaster.GetDone()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(doneStats.String())
+}
+
 func (p StatusPuppet) Status() {
 	stats, err := p.statusMaster.GetOverall()
 	if err != nil {

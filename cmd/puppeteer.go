@@ -27,7 +27,8 @@ func NewPuppeteer(statusMaster service.StatusMaster, categoryMaster service.Cate
 
 // Define constants for commands
 const (
-	AllStatus      = "all-status"
+	AllStatus      = "status-all"
+	DoneStatus     = "done-status"
 	CreateCategory = "create-category"
 	EditCategory   = "edit-category"
 	ListCategory   = "list-category"
@@ -45,6 +46,8 @@ func (c *Puppeteer) Execute(cmd string) {
 	switch cmd {
 	case AllStatus:
 		c.statusPuppet.Status()
+	case DoneStatus:
+		c.statusPuppet.Done()
 	case CreateCategory:
 		c.categoryPuppet.create()
 	case EditCategory:
