@@ -34,10 +34,13 @@ func main() {
 	// build task and category services
 	categoryService := service.BuildCategoryService(user)
 	categoryValidationService := service.NewCategoryValidationService(categoryService)
+
 	taskService := service.BuildTaskService(user, categoryValidationService)
 
+	statusService := service.NewStatusService(categoryService, taskService)
+
 	// build the master puppet for directing the puppets
-	command := cmd.NewPuppeteer(categoryService, taskService)
+	command := cmd.NewPuppeteer(statusService, categoryService, taskService)
 
 	// running application loop
 	if initCommand != "register-user" {
