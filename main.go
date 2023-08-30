@@ -54,8 +54,8 @@ func main() {
 }
 
 func parseArgs(args []string) (string, string) {
-	entityType := "task"
-	operation := "list"
+	entityType := "status"
+	operation := "done"
 
 	if len(args) > 1 {
 		entityType = args[1]
