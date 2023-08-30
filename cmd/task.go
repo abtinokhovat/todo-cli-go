@@ -8,11 +8,11 @@ import (
 )
 
 type TaskPuppet struct {
-	service *service.TaskService
+	service service.TaskMaster
 	scanner *scanner2.Scanner
 }
 
-func NewTaskPuppet(service *service.TaskService, scanner *scanner2.Scanner) *TaskPuppet {
+func NewTaskPuppet(service service.TaskMaster, scanner *scanner2.Scanner) *TaskPuppet {
 	return &TaskPuppet{
 		service: service,
 		scanner: scanner,

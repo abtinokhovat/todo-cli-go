@@ -9,11 +9,11 @@ import (
 )
 
 type CategoryPuppet struct {
-	service *service.CategoryService
+	service service.CategoryMaster
 	scanner *scanner.Scanner
 }
 
-func NewCategoryPuppet(service *service.CategoryService, scanner *scanner.Scanner) *CategoryPuppet {
+func NewCategoryPuppet(service service.CategoryMaster, scanner *scanner.Scanner) *CategoryPuppet {
 	return &CategoryPuppet{
 		service: service,
 		scanner: scanner,
