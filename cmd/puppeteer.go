@@ -12,19 +12,22 @@ import (
 type Puppeteer struct {
 	categoryPuppet *CategoryPuppet
 	taskPuppet     *TaskPuppet
+	statusPuppet   *StatusPuppet
 }
 
-func NewPuppeteer(categoryService *service.CategoryService, taskService *service.TaskService) *Puppeteer {
+func NewPuppeteer(statusMaster service.StatusMaster, categoryMaster service.CategoryMaster, taskMaster service.TaskMaster) *Puppeteer {
 	scanner := scanner2.NewScanner(bufio.NewScanner(os.Stdin))
 
 	return &Puppeteer{
-		categoryPuppet: NewCategoryPuppet(categoryService, scanner),
-		taskPuppet:     NewTaskPuppet(taskService, scanner),
+		statusPuppet:   NewStatusPuppet(statusMaster),
+		categoryPuppet: NewCategoryPuppet(categoryMaster, scanner),
+		taskPuppet:     NewTaskPuppet(taskMaster, scanner),
 	}
 }
 
 // Define constants for commands
 const (
+	AllStatus      = "all-status"
 	CreateCategory = "create-category"
 	EditCategory   = "edit-category"
 	ListCategory   = "list-category"
@@ -40,6 +43,8 @@ const (
 func (c *Puppeteer) Execute(cmd string) {
 	// Check the command and call the appropriate handler
 	switch cmd {
+	case AllStatus:
+		c.statusPuppet.Status()
 	case CreateCategory:
 		c.categoryPuppet.create()
 	case EditCategory:
