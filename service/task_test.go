@@ -8,6 +8,7 @@ import (
 	"todo-cli-go/entity"
 	"todo-cli-go/error"
 	"todo-cli-go/pkg/date"
+	"todo-cli-go/pkg/scanner"
 	"todo-cli-go/service"
 	"todo-cli-go/test/util"
 
@@ -73,6 +74,7 @@ var (
 			UserID:     2,
 		},
 	}
+	serviceErr = errors.New("service err")
 )
 
 func TestBuildTaskService(t *testing.T) {
@@ -81,38 +83,61 @@ func TestBuildTaskService(t *testing.T) {
 
 func TestTaskService_Create(t *testing.T) {
 	testCases := []struct {
-		name string
-		task entity.Task
-		err  error
+		name   string
+		task   entity.Task
+		config mockCategoryValidatorConfig
+		err    error
 	}{
 		{
-			name: "ordinary create with category and due date",
+			name:   "ordinary create with category and due date",
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: true},
 			task: entity.Task{
 				Title:      "",
-				DueDate:    nil,
-				CategoryID: 0,
+				DueDate:    util_test.GetDate(2023, 11, 11),
+				CategoryID: 1,
 			},
 		},
 		{
-			name: "ordinary create with due date",
+			name:   "ordinary create with due date",
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: true},
 			task: entity.Task{
-				Title:      "",
-				DueDate:    nil,
-				CategoryID: 0,
+				Title:   "",
+				DueDate: util_test.GetDate(2023, 11, 11),
 			},
 		},
 		{
-			name: "ordinary create with category",
+			name:   "ordinary create with category",
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: true},
 			task: entity.Task{
-				Title:      "",
-				DueDate:    nil,
-				CategoryID: 0,
+				CategoryID: 1,
 			},
 		},
 		{
-			name: "repo error",
-			task: entity.Task{},
-			err:  errRepo,
+			name:   "not owned category",
+			config: mockCategoryValidatorConfig{accept: false, serviceErr: false, found: true},
+			task: entity.Task{
+				CategoryID: 1,
+			},
+			err: apperror.ErrUnauthorized,
+		},
+		{
+			name:   "category not found to create with",
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: false},
+			task: entity.Task{
+				CategoryID: 144,
+			},
+			err: apperror.ErrCategoryNotFound,
+		},
+		{
+			name:   "error in validator service",
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: true, found: true},
+			err:    serviceErr,
+		},
+		{
+			name:   "repo error",
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: true},
+			task:   entity.Task{},
+			err:    repoErr,
 		},
 	}
 
@@ -120,12 +145,13 @@ func TestTaskService_Create(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
 			var haveError bool
-			if errors.Is(tc.err, errRepo) {
+			if errors.Is(tc.err, repoErr) {
 				haveError = true
 			}
 
 			repo := NewMockTaskRepository(haveError)
-			srv := service.NewTaskService(&entity.User{ID: 2}, repo)
+			validator := NewMockCategoryValidator(tc.config)
+			srv := service.NewTaskService(&entity.User{ID: 2}, validator, repo)
 
 			// 2. execution
 			task, err := srv.Create(tc.task.Title, tc.task.DueDate, tc.task.CategoryID)
@@ -145,10 +171,11 @@ func TestTaskService_Create(t *testing.T) {
 
 func TestTaskService_Edit(t *testing.T) {
 	testCases := []struct {
-		name string
-		id   uint
-		task service.TaskUpdate
-		err  error
+		name   string
+		id     uint
+		task   service.TaskUpdate
+		config mockCategoryValidatorConfig
+		err    error
 	}{
 		{
 			name: "ordinary edit",
@@ -159,6 +186,7 @@ func TestTaskService_Edit(t *testing.T) {
 				Done:       pointer(true),
 				CategoryID: pointer[uint](12),
 			},
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: true},
 		},
 		{
 			name: "just edit title",
@@ -175,13 +203,6 @@ func TestTaskService_Edit(t *testing.T) {
 			},
 		},
 		{
-			name: "remove category id",
-			id:   5,
-			task: service.TaskUpdate{
-				CategoryID: pointer[uint](0),
-			},
-		},
-		{
 			name: "just edit done",
 			id:   1,
 			task: service.TaskUpdate{
@@ -189,11 +210,47 @@ func TestTaskService_Edit(t *testing.T) {
 			},
 		},
 		{
+			name: "remove category id",
+			id:   5,
+			task: service.TaskUpdate{
+				CategoryID: pointer[uint](0),
+			},
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: true},
+		},
+		{
 			name: "just edit category id",
 			id:   1,
 			task: service.TaskUpdate{
 				CategoryID: pointer[uint](12),
 			},
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: true},
+		},
+		{
+			name: "edit category id which is not owned by user",
+			id:   1,
+			task: service.TaskUpdate{
+				CategoryID: pointer[uint](32),
+			},
+			config: mockCategoryValidatorConfig{accept: false, serviceErr: false, found: true},
+			err:    apperror.ErrUnauthorized,
+		},
+		{
+			name: "edit category id which will cause service err",
+			id:   1,
+			task: service.TaskUpdate{
+				CategoryID: pointer[uint](32),
+			},
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: true, found: true},
+			err:    serviceErr,
+		},
+		{
+			name: "edit category id which will do not exists",
+			id:   1,
+			task: service.TaskUpdate{
+				CategoryID: pointer[uint](144),
+			},
+			config: mockCategoryValidatorConfig{accept: true, serviceErr: false, found: false},
+			err:    apperror.ErrCategoryNotFound,
 		},
 		{
 			name: "not available task edit",
@@ -208,7 +265,7 @@ func TestTaskService_Edit(t *testing.T) {
 		{
 			name: "repo error",
 			id:   1,
-			err:  errRepo,
+			err:  repoErr,
 		},
 	}
 
@@ -216,12 +273,13 @@ func TestTaskService_Edit(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
 			var haveError bool
-			if errors.Is(tc.err, errRepo) {
+			if errors.Is(tc.err, repoErr) {
 				haveError = true
 			}
 
 			repo := NewMockTaskRepository(haveError)
-			srv := service.NewTaskService(&entity.User{ID: 2}, repo)
+			validator := NewMockCategoryValidator(tc.config)
+			srv := service.NewTaskService(&entity.User{ID: 2}, validator, repo)
 
 			// 2. execution
 			beforeEdit, _ := srv.GetByID(tc.id)
@@ -273,7 +331,7 @@ func TestTaskService_Get(t *testing.T) {
 		},
 		{
 			name: "repo error",
-			err:  errRepo,
+			err:  repoErr,
 		},
 	}
 
@@ -281,12 +339,12 @@ func TestTaskService_Get(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
 			var haveError bool
-			if errors.Is(tc.err, errRepo) {
+			if errors.Is(tc.err, repoErr) {
 				haveError = true
 			}
 
 			repo := NewMockTaskRepository(haveError)
-			srv := service.NewTaskService(&entity.User{ID: tc.userID}, repo)
+			srv := service.NewTaskService(&entity.User{ID: tc.userID}, nil, repo)
 
 			// 2. execution
 			tasks, err := srv.Get()
@@ -325,7 +383,7 @@ func TestTaskService_GetByDate(t *testing.T) {
 		},
 		{
 			name: "repo error",
-			err:  errRepo,
+			err:  repoErr,
 		},
 	}
 
@@ -333,14 +391,14 @@ func TestTaskService_GetByDate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
 			var haveError bool
-			if errors.Is(tc.err, errRepo) {
+			if errors.Is(tc.err, repoErr) {
 				haveError = true
 			}
 
 			userID := uint(2)
 
 			repo := NewMockTaskRepository(haveError)
-			srv := service.NewTaskService(&entity.User{ID: userID}, repo)
+			srv := service.NewTaskService(&entity.User{ID: userID}, nil, repo)
 
 			// 2. execution
 			tasks, err := srv.GetByDate(tc.date)
@@ -373,7 +431,7 @@ func TestTaskService_GetToday(t *testing.T) {
 		},
 		{
 			name: "repo error",
-			err:  errRepo,
+			err:  repoErr,
 		},
 	}
 
@@ -381,14 +439,14 @@ func TestTaskService_GetToday(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
 			var haveError bool
-			if errors.Is(tc.err, errRepo) {
+			if errors.Is(tc.err, repoErr) {
 				haveError = true
 			}
 
 			userID := uint(2)
 
 			repo := NewMockTaskRepository(haveError)
-			srv := service.NewTaskService(&entity.User{ID: userID}, repo)
+			srv := service.NewTaskService(&entity.User{ID: userID}, nil, repo)
 
 			// 2. execution
 			tasks, err := srv.GetTodayTasks()
@@ -444,7 +502,7 @@ func TestTaskService_Toggle(t *testing.T) {
 		},
 		{
 			name: "repo error",
-			err:  errRepo,
+			err:  repoErr,
 		},
 	}
 
@@ -452,12 +510,12 @@ func TestTaskService_Toggle(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// 1. setup
 			var haveError bool
-			if errors.Is(tc.err, errRepo) {
+			if errors.Is(tc.err, repoErr) {
 				haveError = true
 			}
 
 			repo := NewMockTaskRepository(haveError)
-			srv := service.NewTaskService(&entity.User{ID: tc.user.ID}, repo)
+			srv := service.NewTaskService(&entity.User{ID: tc.user.ID}, nil, repo)
 
 			// 2. execution
 			err := srv.Toggle(tc.taskID)
@@ -492,7 +550,7 @@ func NewMockTaskRepository(haveError bool) *MockTaskRepository {
 
 func (r *MockTaskRepository) Create(title string, date *date.Date, categoryID, userID uint) (*entity.Task, error) {
 	if r.haveError {
-		return nil, errRepo
+		return nil, repoErr
 	}
 
 	task := entity.NewTask(uint(len(taskStorage)+1), title, false, date, categoryID, userID)
@@ -502,7 +560,7 @@ func (r *MockTaskRepository) Create(title string, date *date.Date, categoryID, u
 }
 func (r *MockTaskRepository) Edit(id uint, title string, done bool, date *date.Date, categoryID uint) (*entity.Task, error) {
 	if r.haveError {
-		return nil, errRepo
+		return nil, repoErr
 	}
 
 	for i := 0; i < len(taskStorage); i++ {
@@ -521,7 +579,7 @@ func (r *MockTaskRepository) Edit(id uint, title string, done bool, date *date.D
 }
 func (r *MockTaskRepository) GetByID(id uint) (*entity.Task, error) {
 	if r.haveError {
-		return nil, errRepo
+		return nil, repoErr
 	}
 
 	for _, task := range taskStorage {
@@ -534,7 +592,7 @@ func (r *MockTaskRepository) GetByID(id uint) (*entity.Task, error) {
 }
 func (r *MockTaskRepository) GetAll() ([]entity.Task, error) {
 	if r.haveError {
-		return nil, errRepo
+		return nil, repoErr
 	}
 	return taskStorage, nil
 }
