@@ -6,6 +6,12 @@ import (
 	"todo-cli-go/repository"
 )
 
+type CategoryMaster interface {
+	Create(title, color string) (*entity.Category, error)
+	Get() ([]entity.Category, error)
+	Edit(id uint, title, color string) (*entity.Category, error)
+}
+
 type CategoryService struct {
 	user *entity.User
 	repo repository.CategoryStorageAdapter
@@ -28,7 +34,6 @@ func (s *CategoryService) Create(title, color string) (*entity.Category, error) 
 
 	return category, err
 }
-
 func (s *CategoryService) Get() ([]entity.Category, error) {
 	categories, err := s.repo.GetAll()
 	if err != nil {
@@ -44,7 +49,6 @@ func (s *CategoryService) Get() ([]entity.Category, error) {
 
 	return userCategories, nil
 }
-
 func (s *CategoryService) Edit(id uint, title, color string) (*entity.Category, error) {
 	category, err := s.repo.GetByID(id)
 	if err != nil {

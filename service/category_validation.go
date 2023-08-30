@@ -10,10 +10,10 @@ type CategoryValidator interface {
 }
 
 type CategoryValidationService struct {
-	categoryService *CategoryService
+	categoryService CategoryMaster
 }
 
-func NewCategoryValidationService(category *CategoryService) CategoryValidator {
+func NewCategoryValidationService(category CategoryMaster) CategoryValidator {
 	return &CategoryValidationService{
 		categoryService: category,
 	}
