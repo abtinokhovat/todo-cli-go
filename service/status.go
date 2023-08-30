@@ -1,12 +1,27 @@
 package service
 
 import (
+	"bytes"
+	"fmt"
 	"todo-cli-go/entity"
 	"todo-cli-go/pkg/scanner"
 )
 
 type StatusMaster interface {
 	GetOverall() ([]entity.Status, error)
+	GetDone() (DoneStatus, error)
+}
+
+type DoneStatus map[entity.Category]int
+
+func (s DoneStatus) String() string {
+	var buffer bytes.Buffer
+	for category, num := range s {
+		buffer.WriteString(fmt.Sprintf("%s: %d tasks to go!\n", category.String(), num))
+	}
+
+	buffer.WriteString("good luck!")
+	return buffer.String()
 }
 
 type StatusService struct {
@@ -19,6 +34,27 @@ func NewStatusService(category CategoryMaster, task TaskMaster) StatusMaster {
 		categoryMaster: category,
 		taskMaster:     task,
 	}
+}
+
+func (s StatusService) GetDone() (DoneStatus, error) {
+	stats, err := s.GetOverall()
+	if err != nil {
+		return nil, err
+	}
+
+	doneStats := make(DoneStatus, len(stats))
+	for _, status := range stats {
+		var doneTasks int
+		for _, task := range status.Tasks {
+			if !task.Done {
+				doneTasks++
+			}
+		}
+
+		doneStats[status.Category] = doneTasks
+	}
+
+	return doneStats, nil
 }
 
 func (s StatusService) GetOverall() ([]entity.Status, error) {
@@ -47,7 +83,6 @@ func (s StatusService) GetOverall() ([]entity.Status, error) {
 	noCategoryStatus := entity.NewStatus(notACategory, tasksWithoutCategory)
 
 	// group other tasks which have category
-
 	var stats []entity.Status
 
 	for _, category := range categories {
