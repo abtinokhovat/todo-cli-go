@@ -1,6 +1,9 @@
 package service
 
-import apperror "todo-cli-go/error"
+import (
+	"todo-cli-go/error"
+	"todo-cli-go/pkg/scanner"
+)
 
 type CategoryValidator interface {
 	IsUserCategory(userID, categoryID uint) (bool, error)
@@ -17,6 +20,10 @@ func NewCategoryValidationService(category *CategoryService) CategoryValidator {
 }
 
 func (s *CategoryValidationService) IsUserCategory(userID, categoryID uint) (bool, error) {
+	// if there was no id return true
+	if categoryID == scanner.NoID {
+		return true, nil
+	}
 	// Validation logic to check if the category belongs to the user
 	categories, err := s.categoryService.Get()
 	if err != nil {

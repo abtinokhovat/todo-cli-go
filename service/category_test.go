@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	errRepo         = errors.New("repository error")
+	repoErr         = errors.New("repository error")
 	categoryStorage = []entity.Category{
 		{
 			Title:  "personal",
@@ -58,7 +58,7 @@ func TestCategoryService_Create(t *testing.T) {
 		{
 			name: "creation with repo error",
 			user: entity.User{ID: 1},
-			err:  errRepo,
+			err:  repoErr,
 		},
 	}
 
@@ -115,7 +115,7 @@ func TestCategoryService_Edit(t *testing.T) {
 		{
 			name:      "repository error",
 			category:  entity.Category{ID: 1, UserID: 1},
-			err:       errRepo,
+			err:       repoErr,
 			repoError: true,
 		},
 	}
@@ -158,7 +158,7 @@ func TestCategoryService_Get(t *testing.T) {
 		{
 			name:      "repo error",
 			userID:    1,
-			err:       errRepo,
+			err:       repoErr,
 			repoError: true,
 		},
 	}
@@ -198,7 +198,7 @@ func NewMockCategoryRepository(haveError bool) *MockCategoryRepository {
 
 func (r *MockCategoryRepository) Create(title, color string, userID uint) (*entity.Category, error) {
 	if r.haveError == true {
-		return nil, errRepo
+		return nil, repoErr
 	}
 	// make a category
 	category := entity.NewCategory(uint(len(categoryStorage)+1), title, color, userID)
@@ -210,7 +210,7 @@ func (r *MockCategoryRepository) Create(title, color string, userID uint) (*enti
 }
 func (r *MockCategoryRepository) Edit(id uint, title, color string) (*entity.Category, error) {
 	if r.haveError == true {
-		return nil, errRepo
+		return nil, repoErr
 	}
 
 	for i := 0; i < len(categoryStorage); i++ {
@@ -226,7 +226,7 @@ func (r *MockCategoryRepository) Edit(id uint, title, color string) (*entity.Cat
 }
 func (r *MockCategoryRepository) GetByID(id uint) (*entity.Category, error) {
 	if r.haveError == true {
-		return nil, errRepo
+		return nil, repoErr
 	}
 
 	for _, category := range categoryStorage {
@@ -239,7 +239,7 @@ func (r *MockCategoryRepository) GetByID(id uint) (*entity.Category, error) {
 }
 func (r *MockCategoryRepository) GetAll() ([]entity.Category, error) {
 	if r.haveError == true {
-		return nil, errRepo
+		return nil, repoErr
 	}
 
 	return categoryStorage, nil
