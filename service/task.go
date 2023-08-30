@@ -17,30 +17,35 @@ type TaskUpdate struct {
 }
 
 type TaskService struct {
-	user *entity.User
-	repo repository.TaskStorageAdapter
+	user              *entity.User
+	repo              repository.TaskStorageAdapter
+	validationService CategoryValidator
 }
 
-func BuildTaskService(user *entity.User) *TaskService {
+func BuildTaskService(user *entity.User, validation CategoryValidator) *TaskService {
 	repo := repository.GetTaskFileRepository()
-	return NewTaskService(user, repo)
+	return NewTaskService(user, validation, repo)
 }
 
-func NewTaskService(user *entity.User, repository repository.TaskStorageAdapter) *TaskService {
+func NewTaskService(user *entity.User, validation CategoryValidator, repository repository.TaskStorageAdapter) *TaskService {
 	return &TaskService{
-		user: user,
-		repo: repository,
+		user:              user,
+		repo:              repository,
+		validationService: validation,
 	}
 }
 
 func (s *TaskService) Create(title string, dueDate *date.Date, categoryID uint) (*entity.Task, error) {
+	isOwned, err := s.validationService.IsUserCategory(s.user.ID, categoryID)
+	if !isOwned {
+		return nil, err
+	}
 	task, err := s.repo.Create(title, dueDate, categoryID, s.user.ID)
 	if err != nil {
 		return nil, err
 	}
 	return task, nil
 }
-
 func (s *TaskService) Edit(id uint, update TaskUpdate) (*entity.Task, error) {
 	task, err := s.repo.GetByID(id)
 	if errors.Is(err, apperror.ErrTaskNotFound) {
@@ -64,6 +69,14 @@ func (s *TaskService) Edit(id uint, update TaskUpdate) (*entity.Task, error) {
 		task.DueDate = update.DueDate
 	}
 	if update.CategoryID != nil {
+		// check if category belongs to user
+		isOwned, err := s.validationService.IsUserCategory(s.user.ID, *update.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !isOwned {
+			return nil, apperror.ErrUnauthorized
+		}
 		task.CategoryID = *update.CategoryID
 	}
 
@@ -74,7 +87,6 @@ func (s *TaskService) Edit(id uint, update TaskUpdate) (*entity.Task, error) {
 
 	return edited, nil
 }
-
 func (s *TaskService) Get() ([]entity.Task, error) {
 	tasks, err := s.repo.GetAll()
 	if err != nil {
@@ -90,7 +102,6 @@ func (s *TaskService) Get() ([]entity.Task, error) {
 
 	return userTasks, nil
 }
-
 func (s *TaskService) GetByID(id uint) (*entity.Task, error) {
 	tasks, err := s.Get()
 	if err != nil {
@@ -105,7 +116,6 @@ func (s *TaskService) GetByID(id uint) (*entity.Task, error) {
 
 	return nil, apperror.ErrTaskNotFound
 }
-
 func (s *TaskService) GetTodayTasks() ([]entity.Task, error) {
 	today := date.Now()
 	todayTasks, err := s.GetByDate(*today)
@@ -116,7 +126,6 @@ func (s *TaskService) GetTodayTasks() ([]entity.Task, error) {
 
 	return todayTasks, nil
 }
-
 func (s *TaskService) GetByDate(date date.Date) ([]entity.Task, error) {
 	tasks, err := s.Get()
 	if err != nil {
@@ -132,7 +141,6 @@ func (s *TaskService) GetByDate(date date.Date) ([]entity.Task, error) {
 
 	return selectedDateTasks, nil
 }
-
 func (s *TaskService) Toggle(id uint) error {
 	task, err := s.repo.GetByID(id)
 	if err != nil {
