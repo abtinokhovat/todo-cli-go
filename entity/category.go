@@ -29,5 +29,9 @@ func (c *Category) String() string {
 	if c.colorCode == "" {
 		c.colorCode = color.GetColor(c.Color)
 	}
+	if c.ID == 0 {
+		return "No Category!"
+	}
+
 	return color.Colorf(c.colorCode, "#%d-%s", c.ID, c.Title)
 }
